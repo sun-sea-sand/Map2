@@ -192,3 +192,15 @@ source.setData({
 type: 'FeatureCollection',
 features: features
 });
+// update the layers
+var layers = map.getStyle().layers;
+for (var i = 0; i < layers.length; i++) {
+  var layer= layers[i];
+if (layer.type === 'symbol' && layer.id !== 'poi-label') {
+map.setLayoutProperty(layer.id, 'text-field', [
+'coalesce',
+['get', 'name_en'],
+['get', 'name']
+]);
+}
+}
