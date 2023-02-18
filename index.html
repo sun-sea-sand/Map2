@@ -58,36 +58,6 @@
 }).addTo(map);
 		
 		
-		
-// Define an array of marker coordinates
-var markerCoords = [
-[51.5, -0.1],
-[51.51, -0.12],
-[51.49, -0.05],
-[51.498, -0.07]
-];
-
-// Loop through the marker coordinates and add them to the map
-markerCoords.forEach(function(coord) {
-L.marker(coord).addTo(markers);
-});
-
-// Define an array of polygon coordinates
-var polygonCoords = [
-[51.509, -0.08],
-[51.503, -0.06],
-[51.51, -0.047],
-[51.517, -0.065]
-];
-
-// Create a polygon object with the coordinates and add it to the map
-L.polygon(polygonCoords, {color: 'red'}).addTo(map);
-
-// Create a popup object and bind it to a marker
-var popup = L.popup()
-.setLatLng([51.5, -0.1])
-.setContent("Hello, world!")
-.openOn(map);
 </script>
 
 </body>
