@@ -64,49 +64,81 @@ var markers = L.layerGroup().addTo(map);
 
 // Add the markers layer to the layer control
 layerControl.addOverlay(markers, 'Markers');
-
-// Hide the form when the map is clicked outside the form
-map.on('click', function(e) {
-  document.getElementById('form-div').style.display = 'none';
-});
+// Define an array to store the marker data
+var markerData = [];
 
 // Show the form when the user clicks on the map
 map.on('click', function(e) {
-  // Get the latitude and longitude of the click event
-  var lat = e.latlng.lat.toFixed(6);
-  var lng = e.latlng.lng.toFixed(6);
+// Get the latitude and longitude of the click event
+var lat = e.latlng.lat.toFixed(6);
+var lng = e.latlng.lng.toFixed(6);
 
-  // Show the form
-  document.getElementById('form-div').style.display = 'block';
+// Show the form
+document.getElementById('form-div').style.display = 'block';
 
-  // Set the latitude and longitude values in the form
-  document.getElementById('lat-input').value = lat;
-  document.getElementById('lng-input').value = lng;
+// Set the latitude and longitude values in the form
+document.getElementById('latitude').value = lat;
+document.getElementById('longitude').value = lng;
 });
 
 // Handle form submission
-document.getElementById('form').addEventListener('submit', function(e) {
-  // Prevent the default form submission behavior
-  e.preventDefault();
+document.getElementById('add-marker-form').addEventListener('submit', function(e) {
+// Prevent the default form submission behavior
+e.preventDefault();
 
-  // Get the form values
-  var title = document.getElementById('title-input').value;
-  var description = document.getElementById('description-input').value;
-  var lat = document.getElementById('lat-input').value;
-  var lng = document.getElementById('lng-input').value;
+// Get the form values
+var name = document.getElementById('name').value;
+var description = document.getElementById('description').value;
+var lat = document.getElementById('latitude').value;
+var lng = document.getElementById('longitude').value;
 
-  // Create a new marker
-  var marker = L.marker([lat, lng]).addTo(markers);
+// Create a new marker with a popup
+var marker = L.marker([lat, lng]).addTo(markers).bindPopup('<b>' + name + '</b><br>' + description);
 
-  // Add a popup to the marker
-  marker.bindPopup('<b>' + title + '</b><br>' + description).openPopup();
+// Add the marker data to the array
+markerData.push({
+name: name,
+description: description,
+lat: lat,
+lng: lng
+});
 
-  // Reset the form
-  document.getElementById('form').reset();
-	
+// Reset the form
+document.getElementById('add-marker-form').reset();
+});
 
-  // Hide the form
-  document.getElementById('form-div').style.display = 'none';
+// Handle search button click
+document.getElementById('search-button').addEventListener('click', function(e) {
+// Prevent the default form submission behavior
+e.preventDefault();
+
+// Get the search input value
+var searchValue = document.getElementById('search-input').value;
+
+// Check if the search input value is a valid latitude and longitude pair
+var latLngArray = searchValue.split(',');
+if (latLngArray.length == 2 && !isNaN(parseFloat(latLngArray[0])) && !isNaN(parseFloat(latLngArray[1]))) {
+// If the search input value is a valid latitude and longitude pair, center the map on the coordinates
+var lat = parseFloat(latLngArray[0]);
+var lng = parseFloat(latLngArray[1]);
+map.setView([lat, lng], 13);
+} else {
+// If the search input value is not a valid latitude and longitude pair, search for a location using the search control
+var geocodeService = L.esri.Geocoding.geocodeService();
+geocodeService.geocode().text(searchValue).run(function(error, response) {
+if (error) {
+console.log(error);
+return;
+}
+if (response.results.length == 0) {
+console.log('No results found');
+return;
+}
+// Center the map on the first result
+var latlng = response.results[0].latlng;
+map.setView(latlng, 13);
+});
+}
 });
 </script>
 	</body>
