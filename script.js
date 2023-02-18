@@ -4,11 +4,36 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
     center: [-122.4, 37.8],
-    zoom: 10
+    zoom: 15
 });
+
+// Initialize the marker
+var marker = new mapboxgl.Marker({
+  draggable: true
+});
+
+// Add the marker to the map
+marker.addTo(map);
+
+// Initialize the form
+var dataForm = document.getElementById('data-form');
+var latitudeInput = document.getElementById('latitude');
+var longitudeInput = document.getElementById('longitude');
+var nameFieldsContainer = document.getElementById('name-description-fields');
+var addFieldsButton = document.getElementById('add-fields-button');
+var submitButton = document.getElementById('submit-button');
+var nameCount = 1;
+
+// Initialize the layer form
+var layerForm = document.getElementById('layer-form');
+var layerSelect = document.getElementById('layer-select');
+
 
 // Initialize mapData array
 var mapData = [];
+
+
+
 
 // Add marker on click
 map.on('click', function(e) {
@@ -168,3 +193,83 @@ toggleButtons.forEach(function(button) {
         this.textContent = visibility === 'visible' ? 'Hide' : 'Show';
     });
 });
+// Initialize the source
+var source = {
+  type: 'geojson',
+  data: {
+    type: 'FeatureCollection',
+    features: []
+  }
+};
+
+// Add the source to the map
+map.on('load', function() {
+  map.addSource('markers', source);
+
+  // Add the layers to the map
+  var uniqueNames = [...new Set(mapData.map(item => item.name))];
+  for (var i = 0; i < uniqueNames.length; i++) {
+    var name = uniqueNames[i];
+    var layerId = name.toLowerCase().replace(/ /g, '-');
+
+    map.addLayer({
+      id: layerId,
+      type: 'fill',
+      source: 'markers',
+      filter: ['==', 'name', name],
+      paint: {
+        'fill-color': {
+          property: 'description',
+          type: 'categorical',
+          stops: mapData.filter(item => item.name === name).map(item => [item.description, item.fillColor])
+        },
+        'fill-opacity': 0.5
+      }
+    });
+
+    // Add the layer to the layer form
+    var option = document.createElement('option');
+    option.value = layerId;
+    option.text = name;
+    layerSelect.add(option);
+  }
+});
+
+// Add a listener for the marker drag event
+marker.on('dragend', function() {
+  var lngLat = marker.getLngLat();
+  latitudeInput.value = lngLat.lat.toFixed(4);
+  longitudeInput.value = lngLat.lng.toFixed(4);
+});
+
+// Add a listener for the add fields button
+addFieldsButton.addEventListener('click', function() {
+  nameCount++;
+
+  var nameField = document.createElement('input');
+  nameField.type = 'text';
+  nameField.id = 'name' + nameCount;
+  nameField.placeholder = 'Name';
+
+  var descriptionField = document.createElement('input');
+  descriptionField.type = 'text';
+  descriptionField.id = 'description' + nameCount;
+  descriptionField.placeholder = 'Description';
+
+  nameFieldsContainer.appendChild(nameField);
+  nameFieldsContainer.appendChild(descriptionField);
+});
+
+// Add a listener for the submit button
+submitButton.addEventListener('click', function(event) {
+  event.preventDefault();
+
+  var latitude = parseFloat(latitudeInput.value);
+  var longitude = parseFloat(longitudeInput.value);
+  var nameFields = document.querySelectorAll('[id^=name]');
+  var descriptionFields = document.querySelectorAll('[id^=description]');
+
+  var feature = {
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
