@@ -1,19 +1,20 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 	<title>Map with Layers</title>
-    	<meta charset="UTF-8">
-    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-    	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    	<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+	
 	<!-- Load Leaflet CSS and JavaScript files -->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-tU1AtEQS6MLjoSreC63j3Pqz75L4eThYbi4fYfb2QgRb9G95iQaENvUKw+o6jKf6" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha384-oo0+H2IY7vNtZNmsbV7yl9jN5NuVfNv+iSt+k51trR5N+fGo/3KRZvbt3qL3OEno" crossorigin=""></script>
+	
 	<style>
-		#mapid {
+		#map {
 			height: 500px;
 			width: 100%;
 			margin-top: 20px;
@@ -22,123 +23,79 @@
 	</style>
 </head>
 <body>
-	<div id="mapid" style="height: 500px;"></div>
+	<div id="map"></div>
+	
 	<div id="form-div" style="display: none;">
 		<form id="add-marker-form">
 			<label for="name">Name:</label>
 			<input type="text" id="name" name="name"><br><br>
 			<label for="description">Description:</label>
 			<input type="text" id="description" name="description"><br><br>
+			<label for="latitude">Latitude:</label>
+			<input type="text" id="latitude" name="latitude"><br><br>
+			<label for="longitude">Longitude:</label>
+			<input type="text" id="longitude" name="longitude"><br><br>
 			<input type="submit" value="Add Marker">
 		</form>
 	</div>
+	
 	<div id="layers-div">
 		<label for="layers-select">Show/Hide Layers:</label>
 		<select id="layers-select">
 			<option value="all">All Layers</option>
 		</select>
 	</div>
+	
 	<div id="search-div">
 		<label for="search-input">Search:</label>
-		<input type="text" id="search-input" name="search-input">
+		<input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
 		<button id="search-button">Search</button>
 	</div>
+	
 	<script>
-		var map = L.map('mapid').setView([51.505, -0.09], 13);
-		var markers = L.layerGroup().addTo(map);
-		var layers = {};
-		var layerControl = L.control.layers({}, layers, {collapsed: false}).addTo(map);
-
-		// Add a marker when the user clicks on the map
-		map.on('click', function(e) {
-			document.getElementById('form-div').style.display = 'block';
-			document.getElementById('add-marker-form').latitude.value = e.latlng.lat;
-			document.getElementById('add-marker-form').longitude.value = e.latlng.lng;
-		});
+		// Initialize the map with center and zoom level
+		var map = L.map('map').setView([51.505, -0.09], 13);
+		
 		// Add a tile layer to the map
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 19,
 			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
 		}).addTo(map);
-		// Add a new marker to the map when the user submits the form
-		document.getElementById('add-marker-form').addEventListener('submit', function(e) {
-			e.preventDefault();
-			var name = document.getElementById('name').value;
-			var description = document.getElementById('description').value;
-			var latitude = document.getElementById('add-marker-form').latitude.value;
-			var longitude = document.getElementById('add-marker-form').longitude.value;
-			var marker = L.marker([latitude, longitude]).addTo(markers);
-			marker.bindPopup(name + ': ' + description);
-			document.getElementById('add-marker-form').reset();
-			document.getElementById('form-div').style.display = 'none';
-			addLayer(name, description);
-		});
-// Add a layer to the map for each unique name in the data
-		function addLayer(name, description) {
-			if (!layers.hasOwnProperty(name)) {
-				var layer = L.geoJSON().addTo(map);
-				layer.options.fillColor = getRandomColor();
-				layers[name] = layer;
-				layerControl.addOverlay(layer, name);
-				document.getElementById('layers-select').add(new Option(name, name));
-			}
-			layers[name].addData({
-				type: 'Feature',
-				properties: {
-					description: description
-				},
-				geometry: {
-					type: 'Point',
-					coordinates: [parseFloat(longitude), parseFloat(latitude)]
-				}
-			});
-		}
-
-		// Get a random color for the layer fill
-		function getRandomColor() {
-			var letters = '0123456789ABCDEF';
-			var color = '#';
-			for (var i = 0; i < 6; i++) {
-				color += letters[Math.floor(Math.random() * 16)];
-			}
-			return color;
-		}
-
-		// Show/hide layers based on user selection
-		document.getElementById('layers-select').addEventListener('change', function(e) {
-			var value = e.target.value;
-			if (value === 'all') {
-				for (var layer in layers) {
-					map.addLayer(layers[layer]);
-				}
-			} else {
-				for (var layer in layers) {
-					if (layer === value) {
-						map.addLayer(layers[layer]);
-					} else {
-						map.removeLayer(layers[layer]);
-					}
-				}
-			}
-		});
-
-		// Search for a location by name or coordinates
-		document.getElementById('search-button').addEventListener('click', function() {
-			var input = document.getElementById('search-input').value;
-			var latlng;
-			if (input.indexOf(',') > -1) {
-				// Search by coordinates
-				var latlngArr = input.split(',');
-				latlng = L.latLng(parseFloat(latlngArr[0]), parseFloat(latlngArr[1]));
-			} else {
-				// Search by name
-				// You can implement your own search logic here, for example using an external API
-				// For the purpose of this example, we simply center the map on the default location
-				latlng = L.latLng(51.505, -0.09);
-			}
-			map.setView(latlng, 13);
-		});
-	</script>
-</body>
-</html>
 		
+		// Create a layer group for the markers
+		var markers = L.layerGroup().addTo(map);
+		
+// Define an array of marker coordinates
+var markerCoords = [
+[51.5, -0.1],
+[51.51, -0.12],
+[51.49, -0.05],
+[51.498, -0.07]
+];
+
+// Loop through the marker coordinates and add them to the map
+markerCoords.forEach(function(coord) {
+L.marker(coord).addTo(markers);
+});
+
+// Define an array of polygon coordinates
+var polygonCoords = [
+[51.509, -0.08],
+[51.503, -0.06],
+[51.51, -0.047],
+[51.517, -0.065]
+];
+
+// Create a polygon object with the coordinates and add it to the map
+L.polygon(polygonCoords, {color: 'red'}).addTo(map);
+
+// Create a popup object and bind it to a marker
+var popup = L.popup()
+.setLatLng([51.5, -0.1])
+.setContent("Hello, world!")
+.openOn(map);
+</script>
+
+</body>
+</html> 
+
