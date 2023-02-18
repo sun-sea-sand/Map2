@@ -99,6 +99,28 @@ var toggleAllLayers = function(visibility) {
     });
 };
 
+// Add new name/description input fields to the form
+var addNameDescriptionFields = function() {
+    var nameDescriptionFields = document.getElementById('name-description-fields');
+    var numFields = nameDescriptionFields.childElementCount / 2;
+    var nameInput = document.createElement('input');
+    nameInput.setAttribute('type', 'text');
+    nameInput.setAttribute('id', 'name' + (numFields + 1));
+    nameInput.setAttribute('placeholder', 'Name ' + (numFields + 1));
+    nameDescriptionFields.appendChild(nameInput);
+
+    var descriptionInput = document.createElement('input');
+    descriptionInput.setAttribute('type', 'text');
+    descriptionInput.setAttribute('id', 'description' + (numFields + 1));
+    descriptionInput.setAttribute('placeholder', 'Description ' + (numFields + 1));
+    nameDescriptionFields.appendChild(descriptionInput);
+};
+
+// Add event listener for "Add Name/Description Pair" button
+var addFieldsButton = document.getElementById('add-fields-button');
+addFieldsButton.addEventListener('click', addNameDescriptionFields);
+
+
 // Event listener for "Add Marker" button
 document.getElementById('submit-button').addEventListener('click', function(e) {
     e.preventDefault();
