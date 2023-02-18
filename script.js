@@ -1,275 +1,194 @@
-// Create map object
+// create the map and display it on the page
 mapboxgl.accessToken = 'pk.eyJ1IjoiYXlvdWIyMjExIiwiYSI6ImNsM3o2N3U2dzBreHkza3F3dm8yMnRkaTgifQ.QcyJ9B6_e5S93W3EgInZyQ';
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
-    center: [-122.4, 37.8],
-    zoom: 15
+    center: [-74.5, 40], // starting position
+    zoom: 9 // starting zoom
 });
 
-// Initialize the marker
-var marker = new mapboxgl.Marker({
-  draggable: true
+// add an event listener to the map to get the latitude and longitude of a clicked location
+map.on('click', function(e) {
+    // extract the latitude and longitude of the clicked location
+    var lngLat = e.lngLat;
+    
+    // show the input form and populate the latitude and longitude fields
+    document.getElementById('marker-form').style.display = 'block';
+    document.getElementById('latitude').value = lngLat.lat.toFixed(4);
+    document.getElementById('longitude').value = lngLat.lng.toFixed(4);
 });
 
-// Add the marker to the map
-marker.addTo(map);
-
-// Initialize the form
-var dataForm = document.getElementById('data-form');
-var latitudeInput = document.getElementById('latitude');
-var longitudeInput = document.getElementById('longitude');
-var nameFieldsContainer = document.getElementById('name-description-fields');
-var addFieldsButton = document.getElementById('add-fields-button');
-var submitButton = document.getElementById('submit-button');
-var nameCount = 1;
-
-// Initialize the layer form
-var layerForm = document.getElementById('layer-form');
-var layerSelect = document.getElementById('layer-select');
-
-
-// Initialize mapData array
+// create an array to store the marker data
 var mapData = [];
 
-
-
-
-// Add marker on click
-map.on('click', function(e) {
-    // Get coordinates of clicked location
-    var coordinates = e.lngLat;
-
-    // Show input form
-    document.getElementById('data-form').style.display = 'block';
-
-    // Clear form fields
-    document.getElementById('latitude').value = coordinates.lat.toFixed(4);
-    document.getElementById('longitude').value = coordinates.lng.toFixed(4);
-    document.getElementById('name1').value = '';
-    document.getElementById('description1').value = '';
-
-    // Remove previous form fields
-    var nameDescriptionFields = document.getElementById('name-description-fields');
-    while (nameDescriptionFields.firstChild) {
-        nameDescriptionFields.removeChild(nameDescriptionFields.firstChild);
-    }
-
-    // Add name/description input fields
-    var numFields = parseInt(document.getElementById('num-fields').value);
-    for (var i = 1; i <= numFields; i++) {
-        var nameInput = document.createElement('input');
-        nameInput.setAttribute('type', 'text');
-        nameInput.setAttribute('id', 'name' + i);
-        nameInput.setAttribute('placeholder', 'Name ' + i);
-        nameDescriptionFields.appendChild(nameInput);
-
-        var descriptionInput = document.createElement('input');
-        descriptionInput.setAttribute('type', 'text');
-        descriptionInput.setAttribute('id', 'description' + i);
-        descriptionInput.setAttribute('placeholder', 'Description ' + i);
-        nameDescriptionFields.appendChild(descriptionInput);
-    }
+// add an event listener to the form submit button to add a new marker to the map
+document.getElementById('submit').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // extract the form data
+    var name = document.getElementById('name').value;
+    var description = document.getElementById('description').value;
+    var latitude = document.getElementById('latitude').value;
+    var longitude = document.getElementById('longitude').value;
+    
+    // create a new marker and add it to the map
+    var marker = new mapboxgl.Marker()
+        .setLngLat([longitude, latitude])
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+        .setHTML('<h3>' + name + '</h3><p>' + description + '</p>'))
+        .addTo(map);
+    
+    // add the marker data to the array
+    mapData.push({name: name, description: description, latitude: latitude, longitude: longitude});
+    
+    // hide the input form
+    document.getElementById('marker-form').style.display = 'none';
+    
+    // clear the form fields
+    document.getElementById('name').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
 });
 
-// Add data to map and mapData array
-var addData = function(data) {
-    mapData.push(data);
+// create a source using the saved data and add a layer for each unique name in the data
+map.on('load', function() {
     map.addSource('markers', {
         type: 'geojson',
         data: {
             type: 'FeatureCollection',
-            features: mapData
+            features: mapData.map(function(marker) {
+                return {
+                    type: 'Feature',
+                    properties: {
+                        name: marker.name,
+                        description: marker.description,
+                        fill: '#FF0000' // default fill color
+                    },
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [marker.longitude, marker.latitude]
+                    }
+                };
+            })
         }
     });
-    var uniqueNames = getUniqueNames();
+    
+    // get an array of unique names in the data
+    var uniqueNames = [...new Set(mapData.map(function(marker) { return marker.name; }))];
+
+    // add a layer for each unique name in the data
     uniqueNames.forEach(function(name) {
         map.addLayer({
             id: name,
             type: 'fill',
             source: 'markers',
-            filter: ['==', 'name', name],
+            filter: ['==', ['get', 'name'], name],
             paint: {
-                'fill-color': ['get', 'color'],
-                'fill-opacity': 0.8
+                'fill-color': ['get', 'fill'],
+                'fill-opacity': 0.5
             }
         });
     });
-};
-
-// Get array of unique names in mapData
-var getUniqueNames = function() {
-    var uniqueNames = [];
-    mapData.forEach(function(feature) {
-        var name = feature.properties.name;
-        if (!uniqueNames.includes(name)) {
-            uniqueNames.push(name);
-        }
-    });
-    return uniqueNames;
-};
-
-// Hide/show layer based on name
-var toggleLayer = function(name, visibility) {
-    if (map.getLayer(name)) {
-        map.setLayoutProperty(name, 'visibility', visibility);
-    }
-};
-
-// Hide/show all layers
-var toggleAllLayers = function(visibility) {
-    var uniqueNames = getUniqueNames();
-    uniqueNames.forEach(function(name) {
-        toggleLayer(name, visibility);
-    });
-};
-
-// Add new name/description input fields to the form
-var addNameDescriptionFields = function() {
-    var nameDescriptionFields = document.getElementById('name-description-fields');
-    var numFields = nameDescriptionFields.childElementCount / 2;
-    var nameInput = document.createElement('input');
-    nameInput.setAttribute('type', 'text');
-    nameInput.setAttribute('id', 'name' + (numFields + 1));
-    nameInput.setAttribute('placeholder', 'Name ' + (numFields + 1));
-    nameDescriptionFields.appendChild(nameInput);
-
-    var descriptionInput = document.createElement('input');
-    descriptionInput.setAttribute('type', 'text');
-    descriptionInput.setAttribute('id', 'description' + (numFields + 1));
-    descriptionInput.setAttribute('placeholder', 'Description ' + (numFields + 1));
-    nameDescriptionFields.appendChild(descriptionInput);
-};
-
-// Add event listener for "Add Name/Description Pair" button
-var addFieldsButton = document.getElementById('add-fields-button');
-addFieldsButton.addEventListener('click', addNameDescriptionFields);
-
-
-// Event listener for "Add Marker" button
-document.getElementById('submit-button').addEventListener('click', function(e) {
-    e.preventDefault();
-    var coordinates = {
-        'lng': parseFloat(document.getElementById('longitude').value),
-        'lat': parseFloat(document.getElementById('latitude').value)
-    };
-  var properties = {};
-    var numFields = parseInt(document.getElementById('num-fields').value);
-    for (var i = 1; i <= numFields; i++) {
-        var name = document.getElementById('name' + i).value;
-        var description = document.getElementById('description' + i).value;
-        if (name && description) {
-            properties[name] = description;
-        }
-    }
-    var data = {
-        'type': 'Feature',
-        'geometry': {
-            'type': 'Point',
-            'coordinates': [coordinates.lng, coordinates.lat]
-        },
-        'properties': properties
-    };
-    addData(data);
-    toggleAllLayers('visible');
-    document.getElementById('data-form').style.display = 'none';
 });
 
-// Event listener for "Cancel" button
-document.getElementById('cancel-button').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('data-form').style.display = 'none';
+// add an event listener to the layer list checkboxes to toggle the visibility of the layers
+var layerList = document.getElementById('layer-list');
+layerList.addEventListener('change', function(e) {
+var layerId = e.target.value;
+var isChecked = e.target.checked;
+
+// toggle the visibility of the layer based on the checkbox state
+map.setLayoutProperty(layerId, 'visibility', isChecked ? 'visible' : 'none');
 });
 
-// Event listener for "Show/Hide Layer" buttons
-var toggleButtons = document.querySelectorAll('.toggle-button');
-toggleButtons.forEach(function(button) {
-    button.addEventListener('click', function(e) {
-        e.preventDefault();
-        var name = this.dataset.name;
-        var visibility = this.dataset.visibility === 'visible' ? 'none' : 'visible';
-        toggleLayer(name, visibility);
-        this.dataset.visibility = visibility;
-        this.textContent = visibility === 'visible' ? 'Hide' : 'Show';
-    });
-});
-// Initialize the source
-var source = {
-  type: 'geojson',
-  data: {
-    type: 'FeatureCollection',
-    features: []
-  }
-};
-
-// Add the source to the map
-map.on('load', function() {
-  map.addSource('markers', source);
-
-  // Add the layers to the map
-  var uniqueNames = [...new Set(mapData.map(item => item.name))];
-  for (var i = 0; i < uniqueNames.length; i++) {
-    var name = uniqueNames[i];
-    var layerId = name.toLowerCase().replace(/ /g, '-');
-
-    map.addLayer({
-      id: layerId,
-      type: 'fill',
-      source: 'markers',
-      filter: ['==', 'name', name],
-      paint: {
-        'fill-color': {
-          property: 'description',
-          type: 'categorical',
-          stops: mapData.filter(item => item.name === name).map(item => [item.description, item.fillColor])
-        },
-        'fill-opacity': 0.5
-      }
-    });
-
-    // Add the layer to the layer form
-    var option = document.createElement('option');
-    option.value = layerId;
-    option.text = name;
-    layerSelect.add(option);
-  }
+// create a search box
+var searchBox = new MapboxGeocoder({
+accessToken: mapboxgl.accessToken,
+mapboxgl: mapboxgl,
+placeholder: 'Search for a location...',
+countries: 'us,ca',
+marker: false
 });
 
-// Add a listener for the marker drag event
-marker.on('dragend', function() {
-  var lngLat = marker.getLngLat();
-  latitudeInput.value = lngLat.lat.toFixed(4);
-  longitudeInput.value = lngLat.lng.toFixed(4);
+// add the search box to the map
+map.addControl(searchBox, 'top-left');
+
+// add an event listener to the search box to center the map on the selected location
+searchBox.on('result', function(e) {
+map.flyTo({
+center: e.result.center,
+zoom: 15
+});
 });
 
-// Add a listener for the add fields button
-addFieldsButton.addEventListener('click', function() {
-  nameCount++;
+// add an event listener to the form to add a marker to the map when the user submits the form
+var form = document.getElementById('marker-form');
+form.addEventListener('submit', function(e) {
+e.preventDefault();
 
-  var nameField = document.createElement('input');
-  nameField.type = 'text';
-  nameField.id = 'name' + nameCount;
-  nameField.placeholder = 'Name';
+// get the form data
+var name = document.getElementById('name').value;
+var description = document.getElementById('description').value;
+var lat = document.getElementById('lat').value;
+var lng = document.getElementById('lng').value;
 
-  var descriptionField = document.createElement('input');
-  descriptionField.type = 'text';
-  descriptionField.id = 'description' + nameCount;
-  descriptionField.placeholder = 'Description';
+// create a new marker and popup
+var marker = new mapboxgl.Marker()
+.setLngLat([lng, lat])
+.addTo(map);
 
-  nameFieldsContainer.appendChild(nameField);
-  nameFieldsContainer.appendChild(descriptionField);
+var popup = new mapboxgl.Popup({ offset: 25 })
+.setHTML('<h3>' + name + '</h3><p>' + description + '</p>');
+
+marker.setPopup(popup);
+
+// add the data to the mapData array
+mapData.push({ name: name, description: description, lat: lat, lng: lng });
+
+// update the layer based on the updated mapData array
+updateLayer();
+
+// clear the form
+document.getElementById('name').value = '';
+document.getElementById('description').value = '';
+document.getElementById('lat').value = '';
+document.getElementById('lng').value = '';
 });
 
-// Add a listener for the submit button
-submitButton.addEventListener('click', function(event) {
-  event.preventDefault();
+// add an event listener to the map to show the form when the user clicks on a location
+map.on('click', function(e) {
+// show the form
+document.getElementById('marker-form-container').style.display = 'block';
 
-  var latitude = parseFloat(latitudeInput.value);
-  var longitude = parseFloat(longitudeInput.value);
-  var nameFields = document.querySelectorAll('[id^=name]');
-  var descriptionFields = document.querySelectorAll('[id^=description]');
+// set the lat and lng values in the form
+document.getElementById('lat').value = e.lngLat.lat;
+document.getElementById('lng').value = e.lngLat.lng;
+});
 
-  var feature = {
-    type: 'Feature',
-    geometry: {
-      type: 'Point',
+// update the layer based on the mapData array
+function updateLayer() {
+// create the GeoJSON feature collection for the source
+var features = [];
+for (var i = 0; i < mapData.length; i++) {
+var data = mapData[i];
+features.push({
+type: 'Feature',
+geometry: {
+type: 'Point',
+coordinates: [data.lng, data.lat]
+},
+properties: {
+name: data.name,
+description: data.description
+}
+});
+}
+
+var source = map.getSource('markers');
+if (source) {
+// update the source data
+source.setData({
+type: 'FeatureCollection',
+features: features
+});
