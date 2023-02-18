@@ -66,3 +66,40 @@ body {
   width: 100%;
   box-sizing: border-box;
 }
+#search-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+}
+
+#search-container label {
+  margin-right: 10px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+#search-container input[type="text"] {
+  flex: 1;
+  margin-right: 10px;
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+#search-container button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
+}
+
+#search-container button:hover {
+  background-color: #3e8e41;
+}
