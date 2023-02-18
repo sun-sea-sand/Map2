@@ -10,12 +10,9 @@
 	<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
 	
 	<!-- Load Leaflet CSS and JavaScript files -->
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-     integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
-	      crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-     integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
-     crossorigin=""></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-tU1AtEQS6MLjoSreC63j3Pqz75L4eThYbi4fYfb2QgRb9G95iQaENvUKw+o6jKf6" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha384-oo0+H2IY7vNtZNmsbV7yl9jN5NuVfNv+iSt+k51trR5N+fGo/3KRZvbt3qL3OEno" crossorigin=""></script>
+	
 	<style>
 		#map {
 			height: 500px;
@@ -52,14 +49,25 @@
 	
 	<script>
 		// Initialize the map with center and zoom level
-		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+		var map = L.map('map').setView([51.505, -0.09], 13);
 		
+		// Add a tile layer to the map
+		var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+		}).addTo(map);
 		
-</script>
+		// Create a layer group for the markers and polygons
+		var layers = {
+		"Markers": markers,
+		"Polygons": polygons
+			};
+			// Add layer control to the map
+		L.control.layers(null, layers).addTo(map);
 
+		// Hide the form and search divs
+		document.getElementById("form-div").style.display = "none";
+		document.getElementById("search-div").style.display = "none";
+	</script>
 </body>
-</html> 
-
+</html>
