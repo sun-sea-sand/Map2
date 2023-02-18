@@ -116,16 +116,11 @@ document.getElementById('add-marker-form').addEventListener('submit', function(e
 
   // Bind the popup to the marker
   var popupContent = '<b>' + markerNameData[0] + '</b><br>' + markerDescriptionData[0];
-  if (markerNameData.length > 1) {
-    popupContent += '<hr>';
-    for (var i = 1; i < markerNameData.length; i++) {
-      popupContent += '<b>' + markerNameData[i] + '</b><br>' + markerDescriptionData[i] + '<br>';
-    }
-  }
   marker.bindPopup(popupContent);
 
-  // Reset the form
+// Reset the form fields to their initial state
   document.getElementById('add-marker-form').reset();
+  document.getElementById('name-description-fields').innerHTML = '';
 
   // Hide the form
   document.getElementById('form-div').style.display = 'none';
