@@ -213,13 +213,6 @@ document.getElementById('add-marker-form').addEventListener('submit', function(e
   // Create a new marker with a popup
   var marker = L.marker([lat, lng]).addTo(markers).bindPopup('<b>' + name + '</b><br>' + description);
 
-
-// Loop through the marker data and create a marker for each item
-for (var i = 0; i < markerData.length; i++) {
-  var data = markerData[i];
-  var marker = L.marker([data.lat, data.lng]).addTo(markers).bindPopup('<b>' + data.name + '</b><br>' + data.description);
-}
-
   // Add the marker data to the array
   markerData.push({
     name: name,
@@ -228,6 +221,15 @@ for (var i = 0; i < markerData.length; i++) {
     lng: lng
   });
 
+  // Reset the form
+  document.getElementById('add-marker-form').reset();
+});
+
+// Loop through the marker data and create a marker for each item
+for (var i = 0; i < markerData.length; i++) {
+  var data = markerData[i];
+  var marker = L.marker([data.lat, data.lng]).addTo(markers).bindPopup('<b>' + data.name + '</b><br>' + data.description);
+}
 	
   // Reset the form
   document.getElementById('add-marker-form').reset();
@@ -235,8 +237,7 @@ for (var i = 0; i < markerData.length; i++) {
   // Hide the form
   document.getElementById('form-div').style.display = 'none';
 });
-  // Prevent the form from being submitted
-  return false;
+
 </script>
 	</body>
 	</html>
