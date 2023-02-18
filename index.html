@@ -96,23 +96,17 @@ var lng = document.getElementById('longitude').value;
 // Create a new marker with a popup
 var marker = L.marker([lat, lng]).addTo(markers);
 
-// Get all the name and description inputs
-    var nameInputs = document.getElementsByName('name[]');
-    var descriptionInputs = document.getElementsByName('description[]');
+// Iterate over the marker data array and create markers for each item
+for (var i = 0; i < markerData.length; i++) {
+    var name = markerData[i].name;
+    var description = markerData[i].description;
+    var lat = markerData[i].lat;
+    var lng = markerData[i].lng;
 
-    // Add the marker data to the array for each name and description pair
-    for (var i = 0; i < nameInputs.length; i++) {
-        var name = nameInputs[i].value;
-        var description = descriptionInputs[i].value;
-        marker.bindPopup('<b>' + name + '</b><br>' + description);
-
-        markerData.push({
-            name: name,
-            description: description,
-            lat: lat,
-            lng: lng
-        });
-    }
+    // Create a new marker with a popup
+    var marker = L.marker([lat, lng]).addTo(markers);
+    marker.bindPopup('<b>' + name + '</b><br>' + description);
+}
 
     // Reset the form
     document.getElementById('add-marker-form').reset();
@@ -178,68 +172,7 @@ document.getElementById('add-name-description').addEventListener('click', functi
   nameDescriptionIndex++;
 });
 
-// Handle form submission
-document.getElementById('add-marker-form').addEventListener('submit', function(e) {
-  // Prevent the default form submission behavior
-  e.preventDefault();
 
-  // Get the form values
-  var names = document.getElementsByName('name[]');
-  var descriptions = document.getElementsByName('description[]');
-  var lat = document.getElementById('latitude').value;
-  var lng = document.getElementById('longitude').value;
-
-  // Create a new marker
-  var marker = L.marker([lat, lng]).addTo(markers);
-
-  // Add a popup to the marker with all the names and descriptions
-  var popupContent = '';
-  for (var i = 0; i < names.length; i++) {
-    popupContent += '<b>' + names[i].value + '</b><br>' + descriptions[i].value + '<br><br>';
-  }
-  marker.bindPopup(popupContent).openPopup();
-
-	// Create a layer group for the markers
-var markers = L.layerGroup().addTo(map);
-
-// Define an array to store the marker data
-var markerData = [];
-
-// Add the markers layer to the layer control
-layerControl.addOverlay(markers, 'Markers');
-
-// Handle form submission
-document.getElementById('add-marker-form').addEventListener('submit', function(e) {
-  // Prevent the default form submission behavior
-  e.preventDefault();
-
-  // Get the form values
-  var name = document.getElementById('name').value;
-  var description = document.getElementById('description').value;
-  var lat = document.getElementById('latitude').value;
-  var lng = document.getElementById('longitude').value;
-
-  // Create a new marker with a popup
-  var marker = L.marker([lat, lng]).addTo(markers).bindPopup('<b>' + name + '</b><br>' + description);
-
-  // Add the marker data to the array
-  markerData.push({
-    name: name,
-    description: description,
-    lat: lat,
-    lng: lng
-  });
-
-  // Reset the form
-  document.getElementById('add-marker-form').reset();
-});
-
-// Loop through the marker data and create a marker for each item
-for (var i = 0; i < markerData.length; i++) {
-  var data = markerData[i];
-  var marker = L.marker([data.lat, data.lng]).addTo(markers).bindPopup('<b>' + data.name + '</b><br>' + data.description);
-}
-	
   // Reset the form
   document.getElementById('add-marker-form').reset();
 
