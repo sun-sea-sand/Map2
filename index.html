@@ -15,6 +15,13 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
 </head>
 <body>
+<div id="search-container">
+        <label for="search-box">Search for a location:</label>
+        <input type="text" id="search-box" placeholder="Enter a location">
+        <button type="button" id="search-button">Search</button>
+        <div id="search-hint">(You can search by name or coordinates: "New York City" or "40.7128, -74.0060")</div>
+    </div>
+    
     <div id='map'></div>
 
     <div id='data-form'>
