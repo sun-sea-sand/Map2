@@ -89,24 +89,33 @@ document.getElementById('add-marker-form').addEventListener('submit', function(e
 e.preventDefault();
 
 // Get the form values
-var name = document.getElementById('name').value;
-var description = document.getElementById('description').value;
+
 var lat = document.getElementById('latitude').value;
 var lng = document.getElementById('longitude').value;
 
 // Create a new marker with a popup
-var marker = L.marker([lat, lng]).addTo(markers).bindPopup('<b>' + name + '</b><br>' + description);
+var marker = L.marker([lat, lng]).addTo(markers);
 
-// Add the marker data to the array
-markerData.push({
-name: name,
-description: description,
-lat: lat,
-lng: lng
-});
+// Get all the name and description inputs
+    var nameInputs = document.getElementsByName('name[]');
+    var descriptionInputs = document.getElementsByName('description[]');
 
-// Reset the form
-document.getElementById('add-marker-form').reset();
+    // Add the marker data to the array for each name and description pair
+    for (var i = 0; i < nameInputs.length; i++) {
+        var name = nameInputs[i].value;
+        var description = descriptionInputs[i].value;
+        marker.bindPopup('<b>' + name + '</b><br>' + description);
+
+        markerData.push({
+            name: name,
+            description: description,
+            lat: lat,
+            lng: lng
+        });
+    }
+
+    // Reset the form
+    document.getElementById('add-marker-form').reset();
 });
 
 // Handle search button click
