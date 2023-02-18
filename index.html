@@ -24,15 +24,91 @@
 <body>
 	<div id="map"></div>
 	
+	<div id="form-div" style="display: none;">
+		<form id="add-marker-form">
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name"><br><br>
+			<label for="description">Description:</label>
+			<input type="text" id="description" name="description"><br><br>
+			<label for="latitude">Latitude:</label>
+			<input type="text" id="latitude" name="latitude"><br><br>
+			<label for="longitude">Longitude:</label>
+			<input type="text" id="longitude" name="longitude"><br><br>
+			<input type="submit" value="Add Marker">
+		</form>
+	</div>
+	
+	<div id="search-div">
+		<label for="search-input">Search:</label>
+		<input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
+		<button id="search-button">Search</button>
+	</div>
+	
 	<script>
-		// Initialize the map with center and zoom level
-		var map = L.map('map').setView([51.505, -0.09], 13);
+		// Initialize the map
+var map = L.map('map').setView([51.505, -0.09], 13);
+
+// Add the tile layer to the map
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+    '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+    'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+  maxZoom: 18,
+}).addTo(map);
+
+// Create a layer control and add it to the map
+var layerControl = L.control.layers().addTo(map);
+
+// Create a layer group for the markers
+var markers = L.layerGroup().addTo(map);
+
+// Add the markers layer to the layer control
+layerControl.addOverlay(markers, 'Markers');
+
+// Hide the form when the map is clicked outside the form
+map.on('click', function(e) {
+  document.getElementById('form-div').style.display = 'none';
+});
+
+// Show the form when the user clicks on the map
+map.on('click', function(e) {
+  // Get the latitude and longitude of the click event
+  var lat = e.latlng.lat.toFixed(6);
+  var lng = e.latlng.lng.toFixed(6);
+
+  // Show the form
+  document.getElementById('form-div').style.display = 'block';
+
+  // Set the latitude and longitude values in the form
+  document.getElementById('lat-input').value = lat;
+  document.getElementById('lng-input').value = lng;
+});
+
+// Handle form submission
+document.getElementById('form').addEventListener('submit', function(e) {
+  // Prevent the default form submission behavior
+  e.preventDefault();
+
+  // Get the form values
+  var title = document.getElementById('title-input').value;
+  var description = document.getElementById('description-input').value;
+  var lat = document.getElementById('lat-input').value;
+  var lng = document.getElementById('lng-input').value;
+
+  // Create a new marker
+  var marker = L.marker([lat, lng]).addTo(markers);
+
+  // Add a popup to the marker
+  marker.bindPopup('<b>' + title + '</b><br>' + description).openPopup();
+
+  // Reset the form
+  document.getElementById('form').reset();
+	
+
+  // Hide the form
+  document.getElementById('form-div').style.display = 'none';
+});
+</script>
+	</body>
+	</html>
 		
-		// Add a tile layer to the map
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			maxZoom: 19,
-			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-		}).addTo(map);
-	</script>
-</body>
-</html>
