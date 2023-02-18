@@ -15,43 +15,47 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
 </head>
 <body>
-<div id="search-container">
-        <label for="search-box">Search for a location:</label>
-        <input type="text" id="search-box" placeholder="Enter a location">
-        <button type="button" id="search-button">Search</button>
-        <div id="search-hint">(You can search by name or coordinates: "New York City" or "40.7128, -74.0060")</div>
+    <div id="search-container">
+        <h2>Search Location</h2>
+        <label for="search-input">Search:</label>
+        <input type="text" name="search-input" id="search-input" placeholder="Search by name or coordinates" /><br />
+        <small>Enter either a location name or its coordinates (comma-separated latitude and longitude values).</small>
+        <br />
+        <input type="radio" name="search-type" id="search-type-name" value="name" checked />
+        <label for="search-type-name">Name</label>
+        <input type="radio" name="search-type" id="search-type-coords" value="coords" />
+        <label for="search-type-coords">Coordinates</label>
+        <br />
+        <label for="search-layers">Show layers:</label>
+        <input type="checkbox" name="search-layers" id="search-layers" checked />
     </div>
-    
-    <div id='map'></div>
+    <div id="map-container">
+    <div id="map"></div>
+</div>
 
-    <div id='data-form'>
-        <h3>Add Data</h3>
-        <form>
-            <label>Latitude</label>
-            <input type='number' step='0.0001' id='latitude' required />
+<div id="marker-form-container">
+    <h2>Add Marker</h2>
+    <form id="marker-form">
+        <label for="marker-name">Name:</label>
+        <input type="text" id="marker-name" name="marker-name" required /><br />
+        <label for="marker-desc">Description:</label>
+        <input type="text" id="marker-desc" name="marker-desc" required /><br />
+        <label for="marker-color">Color:</label>
+        <input type="color" id="marker-color" name="marker-color" value="#ff0000" /><br />
+        <label for="marker-lat">Latitude:</label>
+        <input type="text" id="marker-lat" name="marker-lat" readonly /><br />
+        <label for="marker-lng">Longitude:</label>
+        <input type="text" id="marker-lng" name="marker-lng" readonly /><br />
+        <button type="submit" id="marker-submit-btn">Add Marker</button>
+    </form>
+</div>
 
-            <label>Longitude</label>
-            <input type='number' step='0.0001' id='longitude' required />
-
-            <div id='name-description-fields'>
-                <label>Name</label>
-                <input type='text' id='name1' />
-                <label>Description</label>
-                <input type='text' id='description1' />
-            </div>
-
-            <button type='button' id='add-fields-button'>Add Name/Description Pair</button>
-            <button type='submit' id='submit-button'>Submit Data</button>
-        </form>
-    </div>
-
-    <div id='layer-form'>
-        <h3>Show/Hide Layers</h3>
-        <form>
-            <label for='layer-select'>Choose a Layer:</label>
-            <select id='layer-select'></select>
-        </form>
-    </div>
-
+<div id="layer-list-container">
+    <h2>Layers</h2>
+    <ul id="layer-list">
+    </ul>
+</div>
 </body>
 </html>
+
+    
