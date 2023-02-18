@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Map with Layers</title>
+	<title>Map</title>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,49 +25,15 @@
 <body>
 	<div id="map"></div>
 	
-	<div id="form-div" style="display: none;">
-		<form id="add-marker-form">
-			<label for="name">Name:</label>
-			<input type="text" id="name" name="name"><br><br>
-			<label for="description">Description:</label>
-			<input type="text" id="description" name="description"><br><br>
-			<label for="latitude">Latitude:</label>
-			<input type="text" id="latitude" name="latitude"><br><br>
-			<label for="longitude">Longitude:</label>
-			<input type="text" id="longitude" name="longitude"><br><br>
-			<input type="submit" value="Add Marker">
-		</form>
-	</div>
-	
-
-	
-	<div id="search-div">
-		<label for="search-input">Search:</label>
-		<input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
-		<button id="search-button">Search</button>
-	</div>
-	
 	<script>
 		// Initialize the map with center and zoom level
 		var map = L.map('map').setView([51.505, -0.09], 13);
 		
 		// Add a tile layer to the map
-		var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 19,
 			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
 		}).addTo(map);
-		
-		// Create a layer group for the markers and polygons
-		var layers = {
-		"Markers": markers,
-		"Polygons": polygons
-			};
-			// Add layer control to the map
-		L.control.layers(null, layers).addTo(map);
-
-		// Hide the form and search divs
-		document.getElementById("form-div").style.display = "none";
-		document.getElementById("search-div").style.display = "none";
 	</script>
 </body>
 </html>
