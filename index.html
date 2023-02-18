@@ -1,61 +1,141 @@
+
 <!DOCTYPE html>
 <html>
 <head>
+	<title>Map with Layers</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Map - Add Data to Map</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-8JPv/NLeS0lL/yZ+VFwjqJ8lLoogz4qc3qdc+2QkJJx6UFWTI6YZZsCZkTDdjfHs" crossorigin=""/>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js" integrity="sha384-yrG/+s6ZTqlTza+jTeT9nJo61yI7c1wSPi+emJ6M24RVZDEodceZP4U6PvU6LQd6" crossorigin=""></script>
+	<style>
+		#mapid {
+			height: 500px;
+			width: 100%;
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
+	</style>
 </head>
 <body>
-    <div id="search-container">
-        <h2>Search Location</h2>
-        <label for="search-input">Search:</label>
-        <input type="text" name="search-input" id="search-input" placeholder="Search by name or coordinates" /><br />
-        <small>Enter either a location name or its coordinates (comma-separated latitude and longitude values).</small>
-        <br />
-        <input type="radio" name="search-type" id="search-type-name" value="name" checked />
-        <label for="search-type-name">Name</label>
-        <input type="radio" name="search-type" id="search-type-coords" value="coords" />
-        <label for="search-type-coords">Coordinates</label>
-        <br />
-        <label for="search-layers">Show layers:</label>
-        <input type="checkbox" name="search-layers" id="search-layers" checked />
-    </div>
-    <div id="map-container">
-    <div id="map"></div>
-</div>
+	<div id="mapid"></div>
+	<div id="form-div" style="display: none;">
+		<form id="add-marker-form">
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name"><br><br>
+			<label for="description">Description:</label>
+			<input type="text" id="description" name="description"><br><br>
+			<input type="submit" value="Add Marker">
+		</form>
+	</div>
+	<div id="layers-div">
+		<label for="layers-select">Show/Hide Layers:</label>
+		<select id="layers-select">
+			<option value="all">All Layers</option>
+		</select>
+	</div>
+	<div id="search-div">
+		<label for="search-input">Search:</label>
+		<input type="text" id="search-input" name="search-input">
+		<button id="search-button">Search</button>
+	</div>
+	<script>
+		var map = L.map('mapid').setView([51.505, -0.09], 13);
+		var markers = L.layerGroup().addTo(map);
+		var layers = {};
+		var layerControl = L.control.layers({}, layers, {collapsed: false}).addTo(map);
 
-<div id="marker-form-container">
-    <h2>Add Marker</h2>
-    <form id="marker-form">
-        <label for="marker-name">Name:</label>
-        <input type="text" id="marker-name" name="marker-name" required /><br />
-        <label for="marker-desc">Description:</label>
-        <input type="text" id="marker-desc" name="marker-desc" required /><br />
-        <label for="marker-color">Color:</label>
-        <input type="color" id="marker-color" name="marker-color" value="#ff0000" /><br />
-        <label for="marker-lat">Latitude:</label>
-        <input type="text" id="marker-lat" name="marker-lat" readonly /><br />
-        <label for="marker-lng">Longitude:</label>
-        <input type="text" id="marker-lng" name="marker-lng" readonly /><br />
-        <button type="submit" id="marker-submit-btn">Add Marker</button>
-    </form>
-</div>
+		// Add a marker when the user clicks on the map
+		map.on('click', function(e) {
+			document.getElementById('form-div').style.display = 'block';
+			document.getElementById('add-marker-form').latitude.value = e.latlng.lat;
+			document.getElementById('add-marker-form').longitude.value = e.latlng.lng;
+		});
 
-<div id="layer-list-container">
-    <h2>Layers</h2>
-    <ul id="layer-list">
-    </ul>
-</div>
+		// Add a new marker to the map when the user submits the form
+		document.getElementById('add-marker-form').addEventListener('submit', function(e) {
+			e.preventDefault();
+			var name = document.getElementById('name').value;
+			var description = document.getElementById('description').value;
+			var latitude = document.getElementById('add-marker-form').latitude.value;
+			var longitude = document.getElementById('add-marker-form').longitude.value;
+			var marker = L.marker([latitude, longitude]).addTo(markers);
+			marker.bindPopup(name + ': ' + description);
+			document.getElementById('add-marker-form').reset();
+			document.getElementById('form-div').style.display = 'none';
+			addLayer(name, description);
+		});
+// Add a layer to the map for each unique name in the data
+		function addLayer(name, description) {
+			if (!layers.hasOwnProperty(name)) {
+				var layer = L.geoJSON().addTo(map);
+				layer.options.fillColor = getRandomColor();
+				layers[name] = layer;
+				layerControl.addOverlay(layer, name);
+				document.getElementById('layers-select').add(new Option(name, name));
+			}
+			layers[name].addData({
+				type: 'Feature',
+				properties: {
+					description: description
+				},
+				geometry: {
+					type: 'Point',
+					coordinates: [parseFloat(longitude), parseFloat(latitude)]
+				}
+			});
+		}
+
+		// Get a random color for the layer fill
+		function getRandomColor() {
+			var letters = '0123456789ABCDEF';
+			var color = '#';
+			for (var i = 0; i < 6; i++) {
+				color += letters[Math.floor(Math.random() * 16)];
+			}
+			return color;
+		}
+
+		// Show/hide layers based on user selection
+		document.getElementById('layers-select').addEventListener('change', function(e) {
+			var value = e.target.value;
+			if (value === 'all') {
+				for (var layer in layers) {
+					map.addLayer(layers[layer]);
+				}
+			} else {
+				for (var layer in layers) {
+					if (layer === value) {
+						map.addLayer(layers[layer]);
+					} else {
+						map.removeLayer(layers[layer]);
+					}
+				}
+			}
+		});
+
+		// Search for a location by name or coordinates
+		document.getElementById('search-button').addEventListener('click', function() {
+			var input = document.getElementById('search-input').value;
+			var latlng;
+			if (input.indexOf(',') > -1) {
+				// Search by coordinates
+				var latlngArr = input.split(',');
+				latlng = L.latLng(parseFloat(latlngArr[0]), parseFloat(latlngArr[1]));
+			} else {
+				// Search by name
+				// You can implement your own search logic here, for example using an external API
+				// For the purpose of this example, we simply center the map on the default location
+				latlng = L.latLng(51.505, -0.09);
+			}
+			map.setView(latlng, 13);
+		});
+	</script>
 </body>
 </html>
-
-    
+		
