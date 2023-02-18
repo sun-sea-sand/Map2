@@ -25,18 +25,20 @@
 	<div id="map"></div>
 	
 	<div id="form-div" style="display: none;">
-		<form id="add-marker-form">
-			<label for="name">Name:</label>
-			<input type="text" id="name" name="name"><br><br>
-			<label for="description">Description:</label>
-			<input type="text" id="description" name="description"><br><br>
-			<label for="latitude">Latitude:</label>
-			<input type="text" id="latitude" name="latitude"><br><br>
-			<label for="longitude">Longitude:</label>
-			<input type="text" id="longitude" name="longitude"><br><br>
-			<input type="submit" value="Add Marker">
-		</form>
-	</div>
+  <form id="add-marker-form">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name[]"><br><br>
+    <label for="description">Description:</label>
+    <input type="text" id="description" name="description[]"><br><br>
+    <label for="latitude">Latitude:</label>
+    <input type="text" id="latitude" name="latitude"><br><br>
+    <label for="longitude">Longitude:</label>
+    <input type="text" id="longitude" name="longitude"><br><br>
+    <div id="name-description-fields"></div>
+    <button id="add-name-description">Add Name/Description</button><br><br>
+    <input type="submit" value="Add Marker">
+  </form>
+</div>
 	
 	<div id="search-div">
 		<label for="search-input">Search:</label>
@@ -140,6 +142,61 @@ map.setView(latlng, 13);
 });
 }
 });
+// Initialize an index for the name/description fields
+var nameDescriptionIndex = 1;
+
+// Handle click event on "Add Name/Description" button
+document.getElementById('add-name-description').addEventListener('click', function(e) {
+  // Prevent the default button behavior
+  e.preventDefault();
+
+  // Create new name/description fields
+  var nameField = document.createElement('input');
+  nameField.type = 'text';
+  nameField.name = 'name[]';
+  nameField.placeholder = 'Name';
+  var descriptionField = document.createElement('input');
+  descriptionField.type = 'text';
+  descriptionField.name = 'description[]';
+  descriptionField.placeholder = 'Description';
+
+  // Add the new fields to the form
+  var nameDescriptionFields = document.getElementById('name-description-fields');
+  nameDescriptionFields.appendChild(nameField);
+  nameDescriptionFields.appendChild(descriptionField);
+
+  // Increment the name/description index
+  nameDescriptionIndex++;
+});
+
+// Handle form submission
+document.getElementById('add-marker-form').addEventListener('submit', function(e) {
+  // Prevent the default form submission behavior
+  e.preventDefault();
+
+  // Get the form values
+  var names = document.getElementsByName('name[]');
+  var descriptions = document.getElementsByName('description[]');
+  var lat = document.getElementById('latitude').value;
+  var lng = document.getElementById('longitude').value;
+
+  // Create a new marker
+  var marker = L.marker([lat, lng]).addTo(markers);
+
+  // Add a popup to the marker with all the names and descriptions
+  var popupContent = '';
+  for (var i = 0; i < names.length; i++) {
+    popupContent += '<b>' + names[i].value + '</b><br>' + descriptions[i].value + '<br><br>';
+  }
+  marker.bindPopup(popupContent).openPopup();
+
+  // Reset the form
+  document.getElementById('add-marker-form').reset();
+
+  // Hide the form
+  document.getElementById('form-div').style.display = 'none';
+});
+
 </script>
 	</body>
 	</html>
