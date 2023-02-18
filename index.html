@@ -3,18 +3,17 @@
 <html>
 <head>
 	<title>Map with Layers</title>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta charset="UTF-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-8JPv/NLeS0lL/yZ+VFwjqJ8lLoogz4qc3qdc+2QkJJx6UFWTI6YZZsCZkTDdjfHs" crossorigin=""/>
-	<script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js" integrity="sha384-yrG/+s6ZTqlTza+jTeT9nJo61yI7c1wSPi+emJ6M24RVZDEodceZP4U6PvU6LQd6" crossorigin=""></script>
+    	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    	<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+	<!-- Load Leaflet CSS and JavaScript files -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-tU1AtEQS6MLjoSreC63j3Pqz75L4eThYbi4fYfb2QgRb9G95iQaENvUKw+o6jKf6" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha384-oo0+H2IY7vNtZNmsbV7yl9jN5NuVfNv+iSt+k51trR5N+fGo/3KRZvbt3qL3OEno" crossorigin=""></script>
 	<style>
-		#mapid {
+		#map {
 			height: 500px;
 			width: 100%;
 			margin-top: 20px;
@@ -23,7 +22,7 @@
 	</style>
 </head>
 <body>
-	<div id="mapid"></div>
+	<div id="map" style="height: 500px;"></div>
 	<div id="form-div" style="display: none;">
 		<form id="add-marker-form">
 			<label for="name">Name:</label>
@@ -56,7 +55,11 @@
 			document.getElementById('add-marker-form').latitude.value = e.latlng.lat;
 			document.getElementById('add-marker-form').longitude.value = e.latlng.lng;
 		});
-
+		// Add a tile layer to the map
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+		}).addTo(map);
 		// Add a new marker to the map when the user submits the form
 		document.getElementById('add-marker-form').addEventListener('submit', function(e) {
 			e.preventDefault();
