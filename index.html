@@ -101,11 +101,15 @@ document.getElementById('add-marker-form').addEventListener('submit', function(e
   // Add the name and description data to the marker data array
   var markerNameData = [];
   for (var i = 0; i < nameFields.length; i++) {
-    markerNameData.push(nameFields[i].value);
+    if (nameFields[i].value !== "") {
+      markerNameData.push(nameFields[i].value);
+    }
   }
   var markerDescriptionData = [];
   for (var i = 0; i < descriptionFields.length; i++) {
-    markerDescriptionData.push(descriptionFields[i].value);
+    if (descriptionFields[i].value !== "") {
+      markerDescriptionData.push(descriptionFields[i].value);
+    }
   }
   markerData.push({
     name: markerNameData,
@@ -113,6 +117,19 @@ document.getElementById('add-marker-form').addEventListener('submit', function(e
     lat: lat,
     lng: lng,
   });
+
+  // Bind the popup to the marker
+  var popupContent = '<b>' + markerNameData[0] + '</b><br>' + markerDescriptionData[0];
+  marker.bindPopup(popupContent);
+
+  // Hide the form and clear the inputs
+  document.getElementById('form-div').style.display = 'none';
+  document.getElementById('name-description-fields').innerHTML = '';
+  document.getElementById('add-name-description').style.display = 'block';
+  document.getElementById('add-marker-form').reset();
+  document.getElementById('name').name = 'name';
+  document.getElementById('description').name = 'description';
+});
 
   // Bind the popup to the marker
   var popupContent = '<b>' + markerNameData[0] + '</b><br>' + markerDescriptionData[0];
