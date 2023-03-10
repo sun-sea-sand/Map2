@@ -1,333 +1,149 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>Map</title>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
-	
-	<!-- Load Leaflet CSS and JavaScript files -->
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
-	<style>
-		#map {
-			height: 500px;
-			width: 100%;
-			margin-top: 20px;
-			margin-bottom: 20px;
-		}
-	</style>
+  <title>Map</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+
+  <!-- Load Leaflet CSS and JavaScript files -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+  <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
+    crossorigin="anonymous"></script>
+  <style>
+    #map {
+      height: 1080px;
+      width: 100%;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    #search-results {
+      display: none;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-top: none;
+      position: absolute;
+      z-index: 9999;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #search-results ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+    }
+
+    #search-results li {
+      padding: 10px;
+      cursor: pointer;
+      border-top: 1px solid #ccc;
+    }
+
+    #search-results li:hover {
+      background-color: #e9e9e9;
+    }
+  </style>
 </head>
+
 <body>
-	<div id="map"></div>
-	
-	<div id="form-div" style="display: none;">
-  <form id="add-marker-form">
-    <label for="latitude">Latitude:</label>
-    <input type="text" id="latitude" name="latitude"><br><br>
-    <label for="longitude">Longitude:</label>
-    <input type="text" id="longitude" name="longitude"><br><br>
-	  <label for="name">Name:</label>
-    <input type="text" id="name" name="name[]"><br><br>
-    <label for="description">Description:</label>
-    <input type="text" id="description" name="description[]"><br><br>
-        <div id="name-description-fields"></div>
-    <button id="add-name-description">Add Name/Description</button><br><br>
-    <input type="submit" value="Add Marker">
-  </form>
-</div>
-	
-	<div id="search-div">
-		<label for="search-input">Search:</label>
-		<input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
-		<button id="search-button">Search</button>
-	</div>
-	
-	<script>
-		// Initialize the map
-var map = L.map('map').setView([51.505, -0.09], 13);
+  <div id="search-div">
+    <label for="search-input">Search:</label>
+    <input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
+    <div id="search-results">
+      <ul></ul>
+    </div>
+  </div>
 
-// Add the tile layer to the map
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-    '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-    'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-  maxZoom: 18,
-}).addTo(map);
+  <div id="suggestions">
+    <ul id="suggestion-list"></ul>
+  </div>
 
-// Create a layer control and add it to the map
-var layerControl = L.control.layers().addTo(map);
+  <div id="map"></div>
 
-// Create a layer group for the markers
-var markers = L.layerGroup().addTo(map);
+  <div id="form-div" style="display: none;">
+    <form id="add-marker-form">
+      <label for="latitude">Latitude:</label>
+      <input type="text" id="latitude" name="latitude"><br><br>
+      <label for="longitude">Longitude:</label>
+      <input type="text" id="longitude" name="longitude"><br><br>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name[]"><br><br>
+      <label for="description">Description:</label>
+      <input type="text" id="description" name="description[]"><br><br>
+      <div id="name-description-fields"></div>
+      <button id="add-name-description">Add Name/Description</button><br><br>
+      <input type="submit" value="Add Marker">
+    </form>
+  </div>
 
-// Add the markers layer to the layer control
-layerControl.addOverlay(markers, 'Markers');
+  <script>
+    $(document).ready(function () {
+      // Create a Leaflet map
+      var map = L.map('map').setView([37.8, -96], 4);
 
-// Define an array to store the marker data
-var markerData = [];
+      // Add a tile layer to the map
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
+      }).addTo(map);
 
-// Show the form when the user clicks on the map
-map.on('click', function(e) {
-  // Get the latitude and longitude of the click event
-  var lat = e.latlng.lat.toFixed(6);
-  var lng = e.latlng.lng.toFixed(6);
+      // Create a search box
+      $('#search-input').on('input', function () {
+        var searchTerm = $(this).val();
 
-  // Show the form
-  document.getElementById('form-div').style.display = 'block';
+        // Search for matching locations
+        if (searchTerm) {
+          $.getJSON('https://nominatim.openstreetmap.org/search', {
+            q: searchTerm,
+            format: 'json',
+            limit: 5
+          }).done(function (data) {
+            if (data.length > 0) {
+              // Clear the suggestion list
+              $('#suggestion-list').empty();
 
-  // Set the latitude and longitude values in the form
-  document.getElementById('latitude').value = lat;
-  document.getElementById('longitude').value = lng;
-});
+              // Add each suggestion to the suggestion list
+              $.each(data, function (index, item) {
+                $('#suggestion-list').append('<li class="suggestion" data-lat="' + item.lat + '" data-lon="' + item.lon + '">' + item.display_name + '</li>');
+              });
 
-// Handle form submission
-document.getElementById('add-marker-form').addEventListener('submit', function(e) {
-  // Prevent the default form submission behavior
-  e.preventDefault();
+              // Show the suggestion list
+              $('#suggestions').show();
+            } else {
+              // Hide the suggestion list
+              $('#suggestions').hide();
+            }
+          });
+        } else {
+          // Hide the suggestion list
+          $('#suggestions').hide();
+        }
+      });
 
-  // Get the form values
-  var lat = document.getElementById('latitude').value;
-  var lng = document.getElementById('longitude').value;
-  var nameFields = document.getElementsByName('name[]');
-  var descriptionFields = document.getElementsByName('description[]');
+      // Handle suggestion click
+      $('#suggestion-list').on('click', '.suggestion', function () {
+        var lat = $(this).data('lat');
+        var lon = $(this).data('lon');
 
-  // Create a new marker with a popup
-  var marker = L.marker([lat, lng]).addTo(markers);
+        // Set the map view to the selected location
+        map.setView([lat, lon], 13);
 
-  // Add the name and description data to the marker data array
-  var markerNameData = [];
-  for (var i = 0; i < nameFields.length; i++) {
-    if (nameFields[i].value !== "") {
-      markerNameData.push(nameFields[i].value);
-    }
-  }
-  var markerDescriptionData = [];
-  for (var i = 0; i < descriptionFields.length; i++) {
-    if (descriptionFields[i].value !== "") {
-      markerDescriptionData.push(descriptionFields[i].value);
-    }
-  }
-  markerData.push({
-    name: markerNameData,
-    description: markerDescriptionData,
-    lat: lat,
-    lng: lng,
-  });
+        // Hide the suggestion list
+        $('#suggestions').hide();
+      });
+    });
 
-  // Bind the popup to the marker
-  var popupContent = '<b>' + markerNameData[0] + '</b><br>' + markerDescriptionData[0];
-  marker.bindPopup(popupContent);
-
-  // Hide the form and clear the inputs
-  document.getElementById('form-div').style.display = 'none';
-  document.getElementById('name-description-fields').innerHTML = '';
-  document.getElementById('add-name-description').style.display = 'block';
-  document.getElementById('add-marker-form').reset();
-  document.getElementById('name').name = 'name';
-  document.getElementById('description').name = 'description';
-});
-
-  // Bind the popup to the marker
-  var popupContent = '<b>' + markerNameData[0] + '</b><br>' + markerDescriptionData[0];
-  marker.bindPopup(popupContent);
-
-// Reset the form fields to their initial state
-  document.getElementById('add-marker-form').reset();
-  document.getElementById('name-description-fields').innerHTML = '';
-
-  // Hide the form
-  document.getElementById('form-div').style.display = 'none';
-
-
-// Handle search button click
-document.getElementById('search-button').addEventListener('click', function(e) {
-  // Prevent the default form submission behavior
-  e.preventDefault();
-	
-	 // Get the search input value
-var searchValue = document.getElementById('search-input').value;
-
-// Check if the search input value is a valid latitude and longitude pair
-var latLngArray = searchValue.split(',');
-if (latLngArray.length == 2 && !isNaN(parseFloat(latLngArray[0])) && !isNaN(parseFloat(latLngArray[1]))) {
-// If the search input value is a valid latitude and longitude pair, center the map on the coordinates
-var lat = parseFloat(latLngArray[0]);
-var lng = parseFloat(latLngArray[1]);
-map.setView([lat, lng], 13);
-} else {
-// If the search input value is not a valid latitude and longitude pair, search for a location using the search control
-var geocodeService = L.esri.Geocoding.geocodeService();
-geocodeService.geocode().text(searchValue).run(function(error, response) {
-if (error) {
-console.log(error);
-return;
-}
-if (response.results.length == 0) {
-console.log('No results found');
-return;
-}
-// Center the map on the first result
-var latlng = response.results[0].latlng;
-map.setView(latlng, 13);
-});
-}
-});
-
-// Initialize an index for the name/description fields
-var nameDescriptionIndex = 1;
-
-// Handle click event on "Add Name/Description" button
-document.getElementById('add-name-description').addEventListener('click', function(e) {
-// Prevent the default button behavior
-e.preventDefault();
-
-// Create new name/description fields
-var nameField = document.createElement('input');
-nameField.type = 'text';
-nameField.name = 'name[]';
-nameField.placeholder = 'Name';
-var descriptionField = document.createElement('input');
-descriptionField.type = 'text';
-descriptionField.name = 'description[]';
-descriptionField.placeholder = 'Description';
-
-// Add the new fields to the form
-var nameDescriptionFields = document.getElementById('name-description-fields');
-nameDescriptionFields.appendChild(nameField);
-nameDescriptionFields.appendChild(descriptionField);
-
-// Increment the name/description index
-nameDescriptionIndex++;
-});
-
-// Handle form submission
-document.getElementById('add-marker-form').addEventListener('submit', function(e) {
-// Prevent the default form submission behavior
-e.preventDefault();
-
-// Get the form values
-var lat = document.getElementById('latitude').value;
-var lng = document.getElementById('longitude').value;
-var nameFields = document.getElementsByName('name[]');
-var descriptionFields = document.getElementsByName('description[]');
-
-// Create a new marker with a popup
-var marker = L.marker([lat, lng]).addTo(markers);
-
-// Iterate over the name and description fields and store the data in an array
-var nameDescriptions = [];
-for (var i = 0; i < nameFields.length; i++) {
-var name = nameFields[i].value;
-var description = descriptionFields[i].value;
-if (name || description) {
-nameDescriptions.push({ name: name, description: description });
-}
-}
-
-// If there is data for the name and description fields, store it with the marker data
-if (nameDescriptions.length > 0) {
-markerData.push({ lat: lat, lng: lng, nameDescriptions: nameDescriptions });
-}
-
-// Bind the popup to the marker
-var popupContent = '<b>Latitude:</b> ' + lat + '<br><b>Longitude:</b> ' + lng;
-if (nameDescriptions.length > 0) {
-popupContent += '<br><br>';
-	// Iterate over the name/description pairs and add them to the popup content
-for (var i = 0; i < nameDescriptions.length; i++) {
-popupContent += '<b>' + nameDescriptions[i].name + ':</b> ' + nameDescriptions[i].description + '<br>';
-}
-}
-marker.bindPopup(popupContent);
-
-// Add the marker to the layer group and the marker data array
-markers.addLayer(marker);
-markerData.push({
-nameDescriptions: nameDescriptions,
-lat: lat,
-lng: lng
-});
-
-// Reset the form
-document.getElementById('add-marker-form').reset();
-
-// Hide the form
-document.getElementById('form-div').style.display = 'none';
-});
-
-// Handle search button click
-document.getElementById('search-button').addEventListener('click', function(e) {
-// Prevent the default form submission behavior
-e.preventDefault();
-
-// Get the search input value
-var searchValue = document.getElementById('search-input').value;
-
-// Check if the search input value is a valid latitude and longitude pair
-var latLngArray = searchValue.split(',');
-if (latLngArray.length == 2 && !isNaN(parseFloat(latLngArray[0])) && !isNaN(parseFloat(latLngArray[1]))) {
-// If the search input value is a valid latitude and longitude pair, center the map on the coordinates
-var lat = parseFloat(latLngArray[0]);
-var lng = parseFloat(latLngArray[1]);
-map.setView([lat, lng], 13);
-} else {
-// If the search input value is not a valid latitude and longitude pair, search for a location using the search control
-var geocodeService = L.esri.Geocoding.geocodeService();
-geocodeService.geocode().text(searchValue).run(function(error, response) {
-if (error) {
-console.log(error);
-return;
-}
-if (response.results.length == 0) {
-console.log('No results found');
-return;
-}
-// Center the map on the first result
-var latlng = response.results[0].latlng;
-map.setView(latlng, 13);
-});
-}
-});
-
-// Initialize an index for the name/description fields
-var nameDescriptionIndex = 1;
-
-// Handle click event on "Add Name/Description" button
-document.getElementById('add-name-description').addEventListener('click', function(e) {
-// Prevent the default button behavior
-e.preventDefault();
-
-// Create new name/description fields
-var nameField = document.createElement('input');
-nameField.type = 'text';
-nameField.name = 'name[]';
-nameField.placeholder = 'Name';
-var descriptionField = document.createElement('input');
-descriptionField.type = 'text';
-descriptionField.name = 'description[]';
-descriptionField.placeholder = 'Description';
-
-// Add the new fields to the form
-var nameDescriptionFields = document.getElementById('name-description-fields');
-nameDescriptionFields.appendChild(nameField);
-nameDescriptionFields.appendChild(descriptionField);
-
-// Increment the name/description index
-nameDescriptionIndex++;
-});
-
-// Reset the form and hide it when the cancel button is clicked
-document.getElementById('cancel-button').addEventListener('click', function(e) {
-e.preventDefault();
-document.getElementById('add-marker-form').reset();
-document.getElementById('form-div').style.display = 'none';
-});
-	
-	</script>
+  </script>
 </body>
+
 </html>
-		
