@@ -146,21 +146,20 @@
     attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
   }).addTo(map);
 
-     
   // Create a search box
   $('#search-input').on('input', function () {
     var searchTerm = $(this).val();
 
     // Search for matching locations
     if (searchTerm) {
-      var isZipCode = /^\d{5}$/.test(searchTerm);
-      var isCoordinates = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchTerm);
-      
-      if (isZipCode) {
+        var isZipCode = /^\d{5}$/.test(searchTerm);
+    var isCoordinates = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchTerm);
+
+    if (isZipCode) {
       // Use zip code search
       $.getJSON('https://api.openweathermap.org/data/2.5/weather', {
         zip: searchTerm,
-        appid: 'be5feda7db54ea851ca9f1b5fd0e39d3'
+        appid: 'your_api_key'
       }).done(function (data) {
         // Extract coordinates from response
         var lat = data.coord.lat;
@@ -170,7 +169,6 @@
         map.setView([lat, lon], 10);
       });
     } else if (isCoordinates) {
-      
       // Use coordinate search
       var [lat, lon] = searchTerm.split(',');
       map.setView([lat, lon], 10);
@@ -197,6 +195,7 @@
           $('#search-results').hide();
         }
       });
+    }
     } else {
       // Hide the suggestion list
       $('#search-results').hide();
@@ -262,10 +261,8 @@ let ipgeo = {
 getLocation();
 
 
-     
-     
-     
 });
+
     
   </script>
 </body>
