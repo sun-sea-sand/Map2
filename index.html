@@ -71,7 +71,7 @@
       overflow: auto;
       box-shadow: 0.5em 0.5em 2em 0.5em rgb(20, 19, 19);
       transition: all 0.25s linear;
-      width: 50%;
+      width: 60%;
 
     }
 
@@ -185,6 +185,56 @@
   });
 });
 
+    
+    
+    
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+        ipgeo.fetchip();
+    }
+}
+
+function showPosition(position) {
+    weatherlatlong.fetchWeatherlatlong(position.coords.latitude, position.coords.longitude);
+}
+
+function showError(error) {
+
+    ipgeo.fetchip();
+}
+
+let ipgeo = {
+    "apiKey_ipgeo": "0043fb7323ed4ebda6c4a96250d5b3c3",
+    fetchip: function () {
+        fetch('https://api.ipgeolocation.io/ipgeo?apiKey='
+            + this.apiKey_ipgeo
+            + '&fields=geo&excludes=continent_code,continent_name'
+        )
+            .then(response => {
+                if (!response.ok) {
+                    const error = (data && data.message) || response.status;
+                    return Promise.reject(error);
+                }
+                return response.json();
+            })
+            .then((data) => this.displayLocationIP(data))
+            .catch(error => {
+                weatherlatlong.fetchWeatherlatlong(32.735687, -97.1080656);
+            });
+    },
+    displayLocationIP: function (data) {
+        const { city, state_prov, country_code2, latitude, longitude } = data;
+        weatherlatlong.fetchWeatherlatlong(latitude, longitude);
+        document.querySelector(".city").innerText = "Weather in " + city + ", " + state_prov + ", " + country_code2;
+        //console.log(data);
+    }
+};
+
+getLocation();
+    
+    
   </script>
 </body>
 
