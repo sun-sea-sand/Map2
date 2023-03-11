@@ -25,6 +25,11 @@
       margin-bottom: 20px;
     }
 
+    #search-input {
+      
+      
+    }
+    
     #search-results {
       display: none;
       background-color: #f9f9f9;
@@ -50,14 +55,13 @@
     }
 
     #search-results li:hover {
-      background-color: #e9e9e9;
+      background-color: #556677;
     }
   </style>
 </head>
 
 <body>
   <div id="search-div">
-    <label for="search-input">Search:</label>
     <input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
     <div id="search-results">
       <ul></ul>
@@ -87,61 +91,61 @@
   </div>
 
   <script>
-    $(document).ready(function () {
-      // Create a Leaflet map
-      var map = L.map('map').setView([37.8, -96], 4);
+   $(document).ready(function () {
+  // Create a Leaflet map
+  var map = L.map('map').setView([37.8, -96], 4);
 
-      // Add a tile layer to the map
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
-      }).addTo(map);
+  // Add a tile layer to the map
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
+  }).addTo(map);
 
-      // Create a search box
-      $('#search-input').on('input', function () {
-        var searchTerm = $(this).val();
+  // Create a search box
+  $('#search-input').on('input', function () {
+    var searchTerm = $(this).val();
 
-        // Search for matching locations
-        if (searchTerm) {
-          $.getJSON('https://nominatim.openstreetmap.org/search', {
-            q: searchTerm,
-            format: 'json',
-            limit: 5
-          }).done(function (data) {
-            if (data.length > 0) {
-              // Clear the suggestion list
-              $('#suggestion-list').empty();
+    // Search for matching locations
+    if (searchTerm) {
+      $.getJSON('https://nominatim.openstreetmap.org/search', {
+        q: searchTerm,
+        format: 'json',
+        limit: 10
+      }).done(function (data) {
+        if (data.length > 0) {
+          // Clear the suggestion list
+          $('#search-results ul').empty();
 
-              // Add each suggestion to the suggestion list
-              $.each(data, function (index, item) {
-                $('#suggestion-list').append('<li class="suggestion" data-lat="' + item.lat + '" data-lon="' + item.lon + '">' + item.display_name + '</li>');
-              });
-
-              // Show the suggestion list
-              $('#suggestions').show();
-            } else {
-              // Hide the suggestion list
-              $('#suggestions').hide();
-            }
+          // Add each suggestion to the suggestion list
+          $.each(data, function (index, item) {
+            $('#search-results ul').append('<li data-lat="' + item.lat + '" data-lon="' + item.lon + '">' + item.display_name + '</li>');
           });
+
+          // Show the suggestion list
+          $('#search-results').show();
         } else {
           // Hide the suggestion list
-          $('#suggestions').hide();
+          $('#search-results').hide();
         }
       });
+    } else {
+      // Hide the suggestion list
+      $('#search-results').hide();
+    }
+  });
 
-      // Handle suggestion click
-      $('#suggestion-list').on('click', '.suggestion', function () {
-        var lat = $(this).data('lat');
-        var lon = $(this).data('lon');
+  // Handle suggestion click
+  $('#search-results ul').on('click', 'li', function () {
+    var lat = $(this).attr('data-lat');
+    var lon = $(this).attr('data-lon');
 
-        // Set the map view to the selected location
-        map.setView([lat, lon], 13);
+    // Center the map at the selected location
+    map.setView([lat, lon], 10);
 
-        // Hide the suggestion list
-        $('#suggestions').hide();
-      });
-    });
+    // Hide the suggestion list
+    $('#search-results').hide();
+  });
+});
 
   </script>
 </body>
