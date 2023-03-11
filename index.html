@@ -51,7 +51,7 @@
       border-radius: 50%;
       border: none;
       outline: none;
-      font-size: 105%;
+      font-size: 115%;
       background-color: #f9f9f9;
       cursor: pointer;
       transition: 0.2s ease-in-out;
@@ -245,6 +245,22 @@
     }
   });
 
+     
+     // Handle enter key press
+$('#search-input').on('keydown', function (event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+    var firstResult = $('#search-results ul li:first-child');
+    if (firstResult.length > 0) {
+      var lat = firstResult.attr('data-lat');
+      var lon = firstResult.attr('data-lon');
+      map.setView([lat, lon], 10);
+      $('#search-results').hide();
+    }
+  }
+});
+     
+     
   // Handle suggestion click
   $('#search-results ul').on('click', 'li', function () {
     var lat = $(this).attr('data-lat');
