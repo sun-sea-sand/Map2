@@ -183,12 +183,10 @@
     // Hide the suggestion list
     $('#search-results').hide();
   });
-});
+
 
     
-    
-    
-function getLocation() {
+  function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition, showError);
     } else {
@@ -197,7 +195,7 @@ function getLocation() {
 }
 
 function showPosition(position) {
-    weatherlatlong.fetchWeatherlatlong(position.coords.latitude, position.coords.longitude);
+  map.setView([position.coords.latitude, position.coords.longitude], 10);
 }
 
 function showError(error) {
@@ -221,19 +219,20 @@ let ipgeo = {
             })
             .then((data) => this.displayLocationIP(data))
             .catch(error => {
-                weatherlatlong.fetchWeatherlatlong(32.735687, -97.1080656);
+              map.setView([37.8, -96], 4);
             });
     },
     displayLocationIP: function (data) {
-        const { city, state_prov, country_code2, latitude, longitude } = data;
-        weatherlatlong.fetchWeatherlatlong(latitude, longitude);
-        document.querySelector(".city").innerText = "Weather in " + city + ", " + state_prov + ", " + country_code2;
-        //console.log(data);
+        const {latitude, longitude} = data;
+        map.setView([latitude, longitude], 10);
     }
 };
 
 getLocation();
-    
+
+
+});
+
     
   </script>
 </body>
