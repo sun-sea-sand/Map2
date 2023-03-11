@@ -165,9 +165,17 @@
         // Extract coordinates from response
         var lat = data.coord.lat;
         var lon = data.coord.lon;
+        var city = data.name;
         
         // Center the map at the selected location
         map.setView([lat, lon], 10);
+        // Add the city name to the suggestion list
+        $('#search-results ul').empty();
+        $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + '</li>');
+
+        // Show the suggestion list
+        $('#search-results').show();
+        
       });
     } else if (isCoordinates) {
       // Use coordinate search
