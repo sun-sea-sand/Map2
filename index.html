@@ -49,6 +49,7 @@
     
     #search-button {
       border-radius: 50%;
+      padding: 0.4em 1em;
       border: none;
       outline: none;
       font-size: 115%;
@@ -273,7 +274,13 @@ $('#search-input').on('keydown', function (event) {
     $('#search-results').hide();
   });
 
-
+// Add event listener to map object
+map.on('click', function(e) {
+  // Hide suggestion list
+  $('#search-results').hide();
+});
+     
+     
     
   function getLocation() {
     if (navigator.geolocation) {
