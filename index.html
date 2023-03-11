@@ -190,7 +190,7 @@
             $('#search-results').show();
         });
       });
-    } else if (!isZipCode) {
+    } else if (isCoordinates) {
       // Use coordinate search
       var [lat, lon] = searchTerm.split(',');
       map.setView([lat, lon], 10);
