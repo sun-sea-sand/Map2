@@ -158,12 +158,11 @@
 
     if (isZipCode) {
       // Use zip code search
-      $('#search-results').hide(); // hide suggestion list
       $.getJSON('https://api.openweathermap.org/data/2.5/weather', {
         zip: searchTerm,
         appid: 'be5feda7db54ea851ca9f1b5fd0e39d3'
       }).done(function (data) {
-        // Extract coordinates and location information from response
+        // Extract coordinates information from response
         var lat = data.coord.lat;
         var lon = data.coord.lon;
         
@@ -194,6 +193,30 @@
       // Use coordinate search
       var [lat, lon] = searchTerm.split(',');
       map.setView([lat, lon], 10);
+      
+      
+          // Get full location information
+          $.getJSON('https://nominatim.openstreetmap.org/reverse', {
+            lat: lat,
+            lon: lon,
+            format: 'json'
+          }).done(function (data) {
+            // Extract city, state, and country from response
+            var city = data.address.city || '';
+            var state = data.address.state || '';
+            var country = data.address.country || '';
+    
+       // Update suggestion list with location information
+            $('#search-results ul').empty();
+            $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
+            
+            // Show the suggestion list
+            $('#search-results').show();
+        });
+      });
+      
+      
+      
     } else {
       // Use name search
       $.getJSON('https://nominatim.openstreetmap.org/search', {
