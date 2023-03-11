@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <!-- Load Leaflet CSS and JavaScript files -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
@@ -26,9 +27,27 @@
     }
 
     #search-input {
-      
+      padding: 6px;
+  margin-top: 8px;
+  font-size: 17px;
+  border: none;
       
     }
+    
+    #search-button {
+  float: right;
+  padding: 6px 10px;
+  margin-top: 8px;
+  margin-right: 16px;
+  background: #ddd;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+}
+
+    #search-button:hover {
+  background: #ccc;
+}
     
     #search-results {
       display: none;
@@ -37,9 +56,9 @@
       border-top: none;
       position: absolute;
       z-index: 9999;
-      width: 100%;
+      width: 50%;
       max-height: 200px;
-      overflow-y: auto;
+      overflow: auto;
     }
 
     #search-results ul {
