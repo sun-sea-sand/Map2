@@ -203,7 +203,7 @@
             format: 'json'
           }).done(function (data) {
             // Extract city, state, and country from response
-            var city = data.address.city || '';
+            var city = data.address.town || data.address.city || '';
             var state = data.address.state || '';
             var country = data.address.country || '';
     
