@@ -155,7 +155,8 @@
     if (searchTerm) {
       var isZipCode = /^\d{5}$/.test(searchTerm);
       var isCoordinates = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchTerm);
-
+      var notstartsWithNumber = !/^\d/.test(searchTerm);
+      
     if (isZipCode) {
       // Use zip code search
       $.getJSON('https://api.openweathermap.org/data/2.5/weather', {
@@ -215,8 +216,8 @@
         });      
       
       
-    } else {
-      // Use name search
+      } else if (notstartsWithNumber) { // check if searchTerm does not start with a number
+    // Use name search
       $.getJSON('https://nominatim.openstreetmap.org/search', {
         q: searchTerm,
         format: 'json',
