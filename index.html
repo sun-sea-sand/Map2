@@ -106,7 +106,7 @@
 
 <body>
   <div id="search-div">
-    <input type="text" id="search-input" name="search-input" placeholder="Enter location name or coordinates">
+    <input type="text" id="search-input" name="search-input" placeholder="Enter location name or zip code">
     <button id="search-button"><i class="fa fa-search"></i></button>
     <div id="search-results">
       <ul></ul>
@@ -190,7 +190,7 @@
             $('#search-results').show();
         });
       });
-    } else if (isCoordinates) {
+    } else if (!isZipCode) {
       // Use coordinate search
       var [lat, lon] = searchTerm.split(',');
       map.setView([lat, lon], 10);
