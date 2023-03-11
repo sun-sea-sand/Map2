@@ -185,10 +185,10 @@
        // Update suggestion list with location information
             $('#search-results ul').empty();
             $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
-
-  // Show the suggestion list
-  $('#search-results').show();
-        
+            
+            // Show the suggestion list
+            $('#search-results').show();
+        });
       });
     } else if (isCoordinates) {
       // Use coordinate search
