@@ -203,29 +203,18 @@
             format: 'json'
           }).done(function (data) {
     // Extract city information from response
-    var city = '';
-    if (data.address.city) {
-      city = data.address.city;
-    } else if (data.address.town) {
-      city = data.address.town;
-    } else if (data.address.village) {
-      city = data.address.village;
-    } else if (data.address.hamlet) {
-      city = data.address.hamlet;
-    }
+            var city = data.address.city || '';
+            var state = data.address.state || '';
+            var country = data.address.country || '';
     
-    // Extract state and country information from response
-    var state = data.address.state || '';
-    var country = data.address.country || '';
-    
-    // Update suggestion list with location information
-    $('#search-results ul').empty();
-    $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
-    
-    // Show the suggestion list
-    $('#search-results').show();
-  });
-
+       // Update suggestion list with location information
+            $('#search-results ul').empty();
+            $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
+            
+            // Show the suggestion list
+            $('#search-results').show();
+        });      
+      
       
       } else if (notstartsWithNumber) { // check if searchTerm does not start with a number
     // Use name search
