@@ -146,6 +146,13 @@
     attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
   }).addTo(map);
 
+     function showCity(cityName) {
+  $('#search-results ul').empty();
+  $('#search-results ul').append('<li>' + cityName + '</li>');
+  $('#search-results').show();
+}
+     
+     
   // Create a search box
   $('#search-input').on('input', function () {
     var searchTerm = $(this).val();
@@ -169,12 +176,10 @@
         
         // Center the map at the selected location
         map.setView([lat, lon], 10);
-        // Add the city name to the suggestion list
-        $('#search-results ul').empty();
-        $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + '</li>');
-
-        // Show the suggestion list
-        $('#search-results').show();
+       
+        
+      // Show the city name in the suggestion list
+      showCity(city);
         
       });
     } else if (isCoordinates) {
