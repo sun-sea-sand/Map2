@@ -280,6 +280,11 @@ map.on('click', function(e) {
   $('#search-results').hide();
 });
      
+     // Add event listener to map object
+map.on('dragstart', function(e) {
+  // Hide suggestion list
+  $('#search-results').hide();
+});
      
     
   function getLocation() {
