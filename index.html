@@ -145,13 +145,7 @@
     maxZoom: 19,
     attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
   }).addTo(map);
-
-     function showCity(cityName) {
-  $('#search-results ul').empty();
-  $('#search-results ul').append('<li>' + cityName + '</li>');
-  $('#search-results').show();
-}
-     
+  
      
   // Create a search box
   $('#search-input').on('input', function () {
@@ -172,16 +166,25 @@
         // Extract coordinates and location information from response
         var lat = data.coord.lat;
         var lon = data.coord.lon;
-        var city = data.name;
-        var state = data.sys.country;
-        var country = data.sys.country;
         
         // Center the map at the selected location
         map.setView([lat, lon], 10);
-       
-  // Update suggestion list with location information
-  $('#search-results ul').empty();
-  $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
+        
+        
+          // Get full location information
+          $.getJSON('https://nominatim.openstreetmap.org/reverse', {
+            lat: lat,
+            lon: lon,
+            format: 'json'
+          }).done(function (data) {
+            // Extract city, state, and country from response
+            var city = data.address.city || '';
+            var state = data.address.state || '';
+            var country = data.address.country || '';
+    
+       // Update suggestion list with location information
+            $('#search-results ul').empty();
+            $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
 
   // Show the suggestion list
   $('#search-results').show();
