@@ -152,6 +152,29 @@
 
     // Search for matching locations
     if (searchTerm) {
+      var isZipCode = /^\d{5}$/.test(searchTerm);
+      var isCoordinates = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchTerm);
+      
+      if (isZipCode) {
+      // Use zip code search
+      $.getJSON('https://api.openweathermap.org/data/2.5/weather', {
+        zip: searchTerm,
+        appid: 'be5feda7db54ea851ca9f1b5fd0e39d3'
+      }).done(function (data) {
+        // Extract coordinates from response
+        var lat = data.coord.lat;
+        var lon = data.coord.lon;
+
+        // Center the map at the selected location
+        map.setView([lat, lon], 10);
+      });
+    } else if (isCoordinates) {
+      
+      // Use coordinate search
+      var [lat, lon] = searchTerm.split(',');
+      map.setView([lat, lon], 10);
+    } else {
+      // Use name search
       $.getJSON('https://nominatim.openstreetmap.org/search', {
         q: searchTerm,
         format: 'json',
