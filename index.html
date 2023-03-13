@@ -302,7 +302,6 @@
         }
       });
 
-
       // Handle suggestion click
       $('#search-results ul').on('click', 'li', function () {
         var lat = $(this).attr('data-lat');
@@ -325,6 +324,23 @@
       map.on('dragstart', function (e) {
         // Hide suggestion list
         $('#search-results').hide();
+      });
+
+
+      // Add event listener to search button
+      $('#search-button').on('click', function (event) {
+        var firstResult = $('#search-results ul li:first-child');
+        if (firstResult.length > 0) {
+          var lat = firstResult.attr('data-lat');
+          var lon = firstResult.attr('data-lon');
+          map.setView([lat, lon], 10);
+          $('#search-results').hide();
+        }
+      });
+
+      // Add event listener to My Location button
+      $('#My-location-button').on('click', function (event) {
+        getLocation();
       });
 
 
@@ -369,7 +385,7 @@
           map.setView([latitude, longitude], 10);
         }
       };
-      getLocation();
+
     });
   </script>
 </body>
