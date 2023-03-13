@@ -35,11 +35,11 @@
     }
 
     #search-div {
-      position: absolute;
-      z-index: 9999;
-      margin-left: 5em;
-      margin-top: 0.5em;
+      position: fixed;
+      left: 5em;
+      top: 1.5em;
       width: 40%;
+      z-index: 9999;
     }
 
     #search-input {
@@ -51,7 +51,7 @@
       font-family: inherit;
       font-size: 105%;
       text-transform: capitalize;
-      width: 70%;
+      width: 80%;
       box-shadow: 0.5em 0.5em 0.4em 0.2em rgba(0, 0, 0, 0.8);
     }
 
@@ -74,11 +74,11 @@
     }
 
     #My-location-button {
-      position: absolute;
+      position:fixed;
       z-index: 500;
-      margin-left: 0.7em;
+      top: 6em;
+      left: 1.2em;
       border-radius: 20%;
-      margin-top: 5.5em;
       padding: 0.3em 0.5em 0.2em 0.4em;
       border: none;
       color: rgba(3, 3, 196, 0.623);
@@ -128,7 +128,7 @@
     }
 
     .leaflet-top {
-      margin-top: 1em;
+      top: 1em;
     }
 
     .leaflet-control-zoom.leaflet-bar.leaflet-control {
@@ -156,15 +156,33 @@
       line-height: 1.5em;
     }
 
-    @media screen and (max-width: 700px) {
+    @media screen and (max-width: 850px) {
       #search-div {
-        margin-left: 4em;
-        width: 80%;
-      }
-
-      #search-results {
+        text-align: center;
+        left: 4em;
         width: 90%;
       }
+      #search-results {
+        text-align:justify;
+        width: 90%;
+      }
+      
+      @media screen and (max-width: 500px) {
+      #search-div {
+        text-align: center;
+        left: 4em;
+        width: 80%;
+      }
+      #search-results {
+        text-align:justify;
+        width: 90%;
+      }
+      
+      @media screen and (max-width: 420px) {
+#search-input {
+  width: 70%;
+}
+ 
   </style>
 </head>
 
