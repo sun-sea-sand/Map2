@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/script.js" defer></script>
 
   <!-- Load Leaflet CSS and JavaScript files -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
@@ -19,21 +21,26 @@
   <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
     crossorigin="anonymous"></script>
   <style>
+    body {
+      overflow: hidden;
+    }
+
     #map {
-      height: 100%;
-      width: 100%;
+      height: 100vh;
+      width: 100vw;
       position: absolute;
-      z-index: 1; 
+      z-index: 1;
+      top: 0;
     }
 
     #search-div {
       position: absolute;
-      z-index: 9999; 
+      z-index: 9999;
       margin-left: 5em;
-      margin-top: 1em;
+      margin-top: 0.5em;
       width: 40%;
     }
-      
+
     #search-input {
       border: none;
       outline: none;
@@ -43,32 +50,54 @@
       font-family: inherit;
       font-size: 105%;
       text-transform: capitalize;
-      width: 80%;
+      width: 70%;
       box-shadow: 0.5em 0.5em 0.4em 0.2em rgba(0, 0, 0, 0.8);
     }
-    
+
     #search-button {
       border-radius: 50%;
       padding: 0.3em 0.4em;
       border: none;
+      color: rgba(3, 3, 196, 0.623);
       outline: none;
       font-size: 105%;
       background-color: #f9f9f9;
       cursor: pointer;
       transition: 0.2s ease-in-out;
-      box-shadow: 0.5em 0.5em 0.4em 0.2em rgba(0, 0, 0, 0.8);
-}
+      box-shadow: 0.5em 0.5em 0.4em 0.2em rgba(0, 0, 0, 0.644);
+    }
 
     #search-button:hover {
-      background: #4b4b4bab;
-}
-    
+      background: #94919179;
+      color: #00c;
+    }
+
+    #My-location-button {
+      margin-left: 0.7em;
+      border-radius: 20%;
+      margin-top: 5.5em;
+      padding: 0.3em 0.5em;
+      border: none;
+      color: rgba(3, 3, 196, 0.623);
+      outline: none;
+      font-size: 105%;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      transition: 0.2s ease-in-out;
+      box-shadow: 0.5em 0.5em 0.4em 0.2em rgba(0, 0, 0, 0.644);
+    }
+
+    #My-location-button:hover {
+      background: #94919179;
+      color: #00c;
+    }
+
     #search-results {
       display: none;
       background-color: #f9f9f9;
       border: 1px solid #e9e9e9;
       border: none;
-      margin-top: 0.5em;
+      margin-top: 1em;
       max-height: 200px;
       border-radius: 1em;
       overflow: auto;
@@ -96,29 +125,45 @@
       cursor: pointer;
       color: rgb(131, 36, 36);
     }
-    
+
+    .leaflet-top.leaflet-left {
+      margin-top: 1em;
+    }
+
     .leaflet-control-zoom.leaflet-bar.leaflet-control {
-    box-shadow: 0.5em 0.5em 0.4em 0.2em rgb(0 0 0 / 80%);
-}
-    
+      box-shadow: 0.5em 0.5em 0.4em 0.2em rgb(0 0 0 / 80%);
+    }
+
+    #My-location-button {
+      position: absolute;
+      z-index: 500;
+    }
+
+    @media screen and (max-width: 700px) {
+      #search-div {
+        margin-left: 4em;
+        width: 80%;
+      }
+
+      #search-results {
+        width: 90%;
+      }
   </style>
 </head>
 
 <body>
+  <div id="map"></div>
   <div id="search-div">
-    <input type="text" id="search-input" name="search-input" placeholder="Enter location name or zip code">
+    <input type="text" id="search-input" name="search-input" placeholder="Location name or zip code">
     <button id="search-button"><i class="fa fa-search"></i></button>
     <div id="search-results">
       <ul></ul>
     </div>
   </div>
-
-  <div id="suggestions">
-    <ul id="suggestion-list"></ul>
+  <div id="My-location-div">
+    <button id="My-location-button"><i class="fa fa-search"></i></button>
   </div>
-
-  <div id="map"></div>
-
+  </div>
   <div id="form-div" style="display: none;">
     <form id="add-marker-form">
       <label for="latitude">Latitude:</label>
@@ -136,205 +181,196 @@
   </div>
 
   <script>
-   $(document).ready(function () {
-  // Create a Leaflet map
-  var map = L.map('map').setView([37.8, -96], 4);
+    $(document).ready(function () {
+      // Create a Leaflet map
+      var map = L.map('map').setView([37.8, -96], 4);
 
-  // Add a tile layer to the map
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
-  }).addTo(map);
-  
-     
-  // Create a search box
-  $('#search-input').on('input', function () {
-    var searchTerm = $(this).val();
+      // Add a tile layer to the map
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://carto.com/">carto.com</a> contributors'
+      }).addTo(map);
 
-    // Search for matching locations
-    if (searchTerm) {
-      var isZipCode = /^\d{5}$/.test(searchTerm);
-      var isCoordinates = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchTerm);
-      var notstartsWithNumber = !/^\d/.test(searchTerm);
-      
-    if (isZipCode) {
-      // Use zip code search
-      $.getJSON('https://api.openweathermap.org/data/2.5/weather', {
-        zip: searchTerm,
-        appid: 'be5feda7db54ea851ca9f1b5fd0e39d3'
-      }).done(function (data) {
-        // Extract coordinates information from response
-        var lat = data.coord.lat;
-        var lon = data.coord.lon;
-        
-        // Center the map at the selected location
-        map.setView([lat, lon], 10);
-        
-        
-          // Get full location information
-          $.getJSON('https://nominatim.openstreetmap.org/reverse', {
-            lat: lat,
-            lon: lon,
-            format: 'json'
-          }).done(function (data) {
-            // Extract city, state, and country from response
-            var city = data.address.city || '';
-            var state = data.address.state || '';
-            var country = data.address.country || '';
-    
-       // Update suggestion list with location information
-            $('#search-results ul').empty();
-            $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
-            
-            // Show the suggestion list
-            $('#search-results').show();
-        });
-      });
-    } else if (isCoordinates) {
-      // Use coordinate search
-      var [lat, lon] = searchTerm.split(',');
-      map.setView([lat, lon], 10);
-      
-      
-          // Get full location information
-          $.getJSON('https://nominatim.openstreetmap.org/reverse', {
-            lat: lat,
-            lon: lon,
-            format: 'json'
-          }).done(function (data) {
-    // Extract city information from response
-            var city = data.address.city || '';
-            var state = data.address.state || '';
-            var country = data.address.country || '';
-    
-       // Update suggestion list with location information
-            $('#search-results ul').empty();
-            $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
-            
-            // Show the suggestion list
-            $('#search-results').show();
-        });      
-      
-      
-      } else if (notstartsWithNumber) { // check if searchTerm does not start with a number
-    // Use name search
-      $.getJSON('https://nominatim.openstreetmap.org/search', {
-        q: searchTerm,
-        format: 'json',
-        limit: 10
-      }).done(function (data) {
-        if (data.length > 0) {
-          // Clear the suggestion list
-          $('#search-results ul').empty();
 
-          // Add each suggestion to the suggestion list
-          $.each(data, function (index, item) {
-            $('#search-results ul').append('<li data-lat="' + item.lat + '" data-lon="' + item.lon + '">' + item.display_name + '</li>');
-          });
+      // Create a search box
+      $('#search-input').on('input', function () {
+        var searchTerm = $(this).val();
 
-          // Show the suggestion list
-          $('#search-results').show();
+        // Search for matching locations
+        if (searchTerm) {
+          var isZipCode = /^\d{5}$/.test(searchTerm);
+          var isCoordinates = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchTerm);
+          var notstartsWithNumber = !/^\d/.test(searchTerm);
+
+          if (isZipCode) {
+            // Use zip code search
+            $.getJSON('https://api.openweathermap.org/data/2.5/weather', {
+              zip: searchTerm,
+              appid: 'be5feda7db54ea851ca9f1b5fd0e39d3'
+            }).done(function (data) {
+              // Extract coordinates information from response
+              var lat = data.coord.lat;
+              var lon = data.coord.lon;
+
+              // Center the map at the selected location
+              map.setView([lat, lon], 10);
+
+
+              // Get full location information
+              $.getJSON('https://nominatim.openstreetmap.org/reverse', {
+                lat: lat,
+                lon: lon,
+                format: 'json'
+              }).done(function (data) {
+                // Extract city, state, and country from response
+                var city = data.address.city || '';
+                var state = data.address.state || '';
+                var country = data.address.country || '';
+
+                // Update suggestion list with location information
+                $('#search-results ul').empty();
+                $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
+
+                // Show the suggestion list
+                $('#search-results').show();
+              });
+            });
+          } else if (isCoordinates) {
+            // Use coordinate search
+            var [lat, lon] = searchTerm.split(',');
+            map.setView([lat, lon], 10);
+
+
+            // Get full location information
+            $.getJSON('https://nominatim.openstreetmap.org/reverse', {
+              lat: lat,
+              lon: lon,
+              format: 'json'
+            }).done(function (data) {
+              // Extract city information from response
+              var city = data.address.city || '';
+              var state = data.address.state || '';
+              var country = data.address.country || '';
+
+              // Update suggestion list with location information
+              $('#search-results ul').empty();
+              $('#search-results ul').append('<li data-lat="' + lat + '" data-lon="' + lon + '">' + city + ', ' + state + ', ' + country + '</li>');
+
+              // Show the suggestion list
+              $('#search-results').show();
+            });
+          } else if (notstartsWithNumber) { // check if searchTerm does not start with a number
+            // Use name search
+            $.getJSON('https://nominatim.openstreetmap.org/search', {
+              q: searchTerm,
+              format: 'json',
+              limit: 10
+            }).done(function (data) {
+              if (data.length > 0) {
+                // Clear the suggestion list
+                $('#search-results ul').empty();
+
+                // Add each suggestion to the suggestion list
+                $.each(data, function (index, item) {
+                  $('#search-results ul').append('<li data-lat="' + item.lat + '" data-lon="' + item.lon + '">' + item.display_name + '</li>');
+                });
+
+                // Show the suggestion list
+                $('#search-results').show();
+              } else {
+                // Hide the suggestion list
+                $('#search-results').hide();
+              }
+            });
+          }
         } else {
           // Hide the suggestion list
           $('#search-results').hide();
         }
       });
-    }
-    } else {
-      // Hide the suggestion list
-      $('#search-results').hide();
-    }
-  });
+      // Handle enter key press
+      $('#search-input').on('keydown', function (event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          var firstResult = $('#search-results ul li:first-child');
+          if (firstResult.length > 0) {
+            var lat = firstResult.attr('data-lat');
+            var lon = firstResult.attr('data-lon');
+            map.setView([lat, lon], 10);
+            $('#search-results').hide();
+          }
+        }
+      });
 
-     
-     // Handle enter key press
-$('#search-input').on('keydown', function (event) {
-  if (event.keyCode === 13) {
-    event.preventDefault();
-    var firstResult = $('#search-results ul li:first-child');
-    if (firstResult.length > 0) {
-      var lat = firstResult.attr('data-lat');
-      var lon = firstResult.attr('data-lon');
-      map.setView([lat, lon], 10);
-      $('#search-results').hide();
-    }
-  }
-});
-     
-     
-  // Handle suggestion click
-  $('#search-results ul').on('click', 'li', function () {
-    var lat = $(this).attr('data-lat');
-    var lon = $(this).attr('data-lon');
 
-    // Center the map at the selected location
-    map.setView([lat, lon], 10);
+      // Handle suggestion click
+      $('#search-results ul').on('click', 'li', function () {
+        var lat = $(this).attr('data-lat');
+        var lon = $(this).attr('data-lon');
 
-    // Hide the suggestion list
-    $('#search-results').hide();
-  });
+        // Center the map at the selected location
+        map.setView([lat, lon], 10);
 
-// Add event listener to map object
-map.on('click', function(e) {
-  // Hide suggestion list
-  $('#search-results').hide();
-});
-     
-     // Add event listener to map object
-map.on('dragstart', function(e) {
-  // Hide suggestion list
-  $('#search-results').hide();
-});
-     
-    
-  function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition, showError);
-    } else {
+        // Hide the suggestion list
+        $('#search-results').hide();
+      });
+
+      // Add event listener to map object
+      map.on('click', function (e) {
+        // Hide suggestion list
+        $('#search-results').hide();
+      });
+
+      // Add event listener to map object
+      map.on('dragstart', function (e) {
+        // Hide suggestion list
+        $('#search-results').hide();
+      });
+
+
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+          ipgeo.fetchip();
+        }
+      }
+
+      function showPosition(position) {
+        map.setView([position.coords.latitude, position.coords.longitude], 10);
+      }
+
+      function showError(error) {
+
         ipgeo.fetchip();
-    }
-}
+      }
 
-function showPosition(position) {
-  map.setView([position.coords.latitude, position.coords.longitude], 10);
-}
-
-function showError(error) {
-
-    ipgeo.fetchip();
-}
-
-let ipgeo = {
-    "apiKey_ipgeo": "0043fb7323ed4ebda6c4a96250d5b3c3",
-    fetchip: function () {
-        fetch('https://api.ipgeolocation.io/ipgeo?apiKey='
+      let ipgeo = {
+        "apiKey_ipgeo": "0043fb7323ed4ebda6c4a96250d5b3c3",
+        fetchip: function () {
+          fetch('https://api.ipgeolocation.io/ipgeo?apiKey='
             + this.apiKey_ipgeo
             + '&fields=geo&excludes=continent_code,continent_name'
-        )
+          )
             .then(response => {
-                if (!response.ok) {
-                    const error = (data && data.message) || response.status;
-                    return Promise.reject(error);
-                }
-                return response.json();
+              if (!response.ok) {
+                const error = (data && data.message) || response.status;
+                return Promise.reject(error);
+              }
+              return response.json();
             })
             .then((data) => this.displayLocationIP(data))
             .catch(error => {
               map.setView([37.8, -96], 4);
             });
-    },
-    displayLocationIP: function (data) {
-        const {latitude, longitude} = data;
-        map.setView([latitude, longitude], 10);
-    }
-};
-
-getLocation();
-
-
-});
-
-    
+        },
+        displayLocationIP: function (data) {
+          const { latitude, longitude } = data;
+          map.setView([latitude, longitude], 10);
+        }
+      };
+      getLocation();
+    });
   </script>
 </body>
 
