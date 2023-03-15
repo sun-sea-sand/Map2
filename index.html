@@ -421,37 +421,22 @@
                             }
                         });
                     }
-                    // Handle enter key press
-                    $('#search-input').on('keydown', function (event) {
-                        if (event.keyCode === 13) {
-                            event.preventDefault();
-                            var firstResult = $('#search-results ul li:first-child');
-                            if (firstResult.length > 0) {
-                                var lat = firstResult.attr('data-lat');
-                                var lon = firstResult.attr('data-lon');
+                } else {
+                    // Hide the suggestion list
+                    $('#search-results').hide();
+                }
+            });
 
-                                var notstartsWithNumber = !/^\d/.test(searchTerm);
-                                if (notstartsWithNumber) { // check if searchTerm does not start with a number
-                                    // Use name search
-                                    map.setView([lat, lon], 10);
-                                    // Hide the suggestion list
-                                    $('#search-results').hide();
-                                } else {
-                                    map.setView([lat, lon], 13);
-                                    // Hide the suggestion list
-                                    $('#search-results').hide();
-                                }
-                            }
-                        }
-                    });
+            // Handle enter key press
+            $('#search-input').on('keydown', function (event) {
+                if (event.keyCode === 13) {
+                    event.preventDefault();
+                    var firstResult = $('#search-results ul li:first-child');
+                    if (firstResult.length > 0) {
+                        var lat = firstResult.attr('data-lat');
+                        var lon = firstResult.attr('data-lon');
 
-                    // Handle suggestion click
-                    $('#search-results ul').on('click', 'li', function () {
-                        var lat = $(this).attr('data-lat');
-                        var lon = $(this).attr('data-lon');
-
-                        // Center the map at the selected location
-                        var notstartsWithNumber = !/^\d/.test(searchTerm);
+                        var notstartsWithNumber = !/^\d/.test($('#search-input').val());
                         if (notstartsWithNumber) { // check if searchTerm does not start with a number
                             // Use name search
                             map.setView([lat, lon], 10);
@@ -462,32 +447,47 @@
                             // Hide the suggestion list
                             $('#search-results').hide();
                         }
-                    });
+                    }
+                }
+            });
 
+            // Handle suggestion click
+            $('#search-results ul').on('click', 'li', function () {
+                var lat = $(this).attr('data-lat');
+                var lon = $(this).attr('data-lon');
 
-                    // Add event listener to search button
-                    $('#search-button').on('click', function (event) {
-                        var firstResult = $('#search-results ul li:first-child');
-                        if (firstResult.length > 0) {
-                            var lat = firstResult.attr('data-lat');
-                            var lon = firstResult.attr('data-lon');
-                            var notstartsWithNumber = !/^\d/.test(searchTerm);
-                            if (notstartsWithNumber) { // check if searchTerm does not start with a number
-                                // Use name search
-                                map.setView([lat, lon], 10);
-                                // Hide the suggestion list
-                                $('#search-results').hide();
-                            } else {
-                                map.setView([lat, lon], 13);
-                                // Hide the suggestion list
-                                $('#search-results').hide();
-                            }
-                        }
-                    });
-
-                } else {
+                // Center the map at the selected location
+                var notstartsWithNumber = !/^\d/.test($('#search-input').val());
+                if (notstartsWithNumber) { // check if searchTerm does not start with a number
+                    // Use name search
+                    map.setView([lat, lon], 10);
                     // Hide the suggestion list
                     $('#search-results').hide();
+                } else {
+                    map.setView([lat, lon], 13);
+                    // Hide the suggestion list
+                    $('#search-results').hide();
+                }
+            });
+
+
+            // Add event listener to search button
+            $('#search-button').on('click', function (event) {
+                var firstResult = $('#search-results ul li:first-child');
+                if (firstResult.length > 0) {
+                    var lat = firstResult.attr('data-lat');
+                    var lon = firstResult.attr('data-lon');
+                    var notstartsWithNumber = !/^\d/.test($('#search-input').val());
+                    if (notstartsWithNumber) { // check if searchTerm does not start with a number
+                        // Use name search
+                        map.setView([lat, lon], 10);
+                        // Hide the suggestion list
+                        $('#search-results').hide();
+                    } else {
+                        map.setView([lat, lon], 13);
+                        // Hide the suggestion list
+                        $('#search-results').hide();
+                    }
                 }
             });
 
@@ -548,7 +548,7 @@
             }
 
             function showPosition(position) {
-                map.setView([position.coords.latitude, position.coords.longitude], 16);
+                map.setView([position.coords.latitude, position.coords.longitude], 17);
             }
 
             function showError(error) {
