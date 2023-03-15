@@ -274,7 +274,7 @@
 <body>
     <div id="map"></div>
     <div id="search-div">
-        <input type="text" id="search-input" name="search-input" placeholder="Location name or zip code">
+        <input type="text" id="search-input" name="search-input" placeholder="Dallas 32.78,-96.81 75202">
         <div class="bar-menu-container" title="Menu">
             <div class="bar1"></div>
             <div class="bar2"></div>
@@ -351,7 +351,7 @@
                             var lon = data.coord.lon;
 
                             // Center the map at the selected location
-                            map.setView([lat, lon], 10);
+                            map.setView([lat, lon], 13);
 
 
                             // Get full location information
@@ -376,7 +376,7 @@
                     } else if (isCoordinates) {
                         // Use coordinate search
                         var [lat, lon] = searchTerm.split(',');
-                        map.setView([lat, lon], 10);
+                        map.setView([lat, lon], 13);
 
 
                         // Get full location information
@@ -421,36 +421,76 @@
                             }
                         });
                     }
+                    // Handle enter key press
+                    $('#search-input').on('keydown', function (event) {
+                        if (event.keyCode === 13) {
+                            event.preventDefault();
+                            var firstResult = $('#search-results ul li:first-child');
+                            if (firstResult.length > 0) {
+                                var lat = firstResult.attr('data-lat');
+                                var lon = firstResult.attr('data-lon');
+
+                                var notstartsWithNumber = !/^\d/.test(searchTerm);
+                                if (notstartsWithNumber) { // check if searchTerm does not start with a number
+                                    // Use name search
+                                    map.setView([lat, lon], 10);
+                                    // Hide the suggestion list
+                                    $('#search-results').hide();
+                                } else {
+                                    map.setView([lat, lon], 13);
+                                    // Hide the suggestion list
+                                    $('#search-results').hide();
+                                }
+                            }
+                        }
+                    });
+
+                    // Handle suggestion click
+                    $('#search-results ul').on('click', 'li', function () {
+                        var lat = $(this).attr('data-lat');
+                        var lon = $(this).attr('data-lon');
+
+                        // Center the map at the selected location
+                        var notstartsWithNumber = !/^\d/.test(searchTerm);
+                        if (notstartsWithNumber) { // check if searchTerm does not start with a number
+                            // Use name search
+                            map.setView([lat, lon], 10);
+                            // Hide the suggestion list
+                            $('#search-results').hide();
+                        } else {
+                            map.setView([lat, lon], 13);
+                            // Hide the suggestion list
+                            $('#search-results').hide();
+                        }
+                    });
+
+
+                    // Add event listener to search button
+                    $('#search-button').on('click', function (event) {
+                        var firstResult = $('#search-results ul li:first-child');
+                        if (firstResult.length > 0) {
+                            var lat = firstResult.attr('data-lat');
+                            var lon = firstResult.attr('data-lon');
+                            var notstartsWithNumber = !/^\d/.test(searchTerm);
+                            if (notstartsWithNumber) { // check if searchTerm does not start with a number
+                                // Use name search
+                                map.setView([lat, lon], 10);
+                                // Hide the suggestion list
+                                $('#search-results').hide();
+                            } else {
+                                map.setView([lat, lon], 13);
+                                // Hide the suggestion list
+                                $('#search-results').hide();
+                            }
+                        }
+                    });
+
                 } else {
                     // Hide the suggestion list
                     $('#search-results').hide();
                 }
             });
-            // Handle enter key press
-            $('#search-input').on('keydown', function (event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    var firstResult = $('#search-results ul li:first-child');
-                    if (firstResult.length > 0) {
-                        var lat = firstResult.attr('data-lat');
-                        var lon = firstResult.attr('data-lon');
-                        map.setView([lat, lon], 10);
-                        $('#search-results').hide();
-                    }
-                }
-            });
 
-            // Handle suggestion click
-            $('#search-results ul').on('click', 'li', function () {
-                var lat = $(this).attr('data-lat');
-                var lon = $(this).attr('data-lon');
-
-                // Center the map at the selected location
-                map.setView([lat, lon], 10);
-
-                // Hide the suggestion list
-                $('#search-results').hide();
-            });
 
             // Add event listener to map object
             map.on('click', function (e) {
@@ -474,16 +514,9 @@
                 }
             });
 
-
-            // Add event listener to search button
-            $('#search-button').on('click', function (event) {
-                var firstResult = $('#search-results ul li:first-child');
-                if (firstResult.length > 0) {
-                    var lat = firstResult.attr('data-lat');
-                    var lon = firstResult.attr('data-lon');
-                    map.setView([lat, lon], 10);
-                    $('#search-results').hide();
-                }
+            // Add event listener to My Location button
+            $('#My-location-button').on('click', function (event) {
+                getLocation();
             });
 
             /* When the user clicks on the menu button, 
@@ -503,10 +536,7 @@
                 $(".bar-menu-container").removeClass("change");
             });
 
-            // Add event listener to My Location button
-            $('#My-location-button').on('click', function (event) {
-                getLocation();
-            });
+
 
 
             function getLocation() {
@@ -518,7 +548,7 @@
             }
 
             function showPosition(position) {
-                map.setView([position.coords.latitude, position.coords.longitude], 10);
+                map.setView([position.coords.latitude, position.coords.longitude], 16);
             }
 
             function showError(error) {
