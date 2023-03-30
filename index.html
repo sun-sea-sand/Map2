@@ -26,11 +26,11 @@
         integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
     <!-- Load Papa Parse library -->
     <script src="
-https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js
-"></script>
-<link href="
-https://cdn.jsdelivr.net/npm/papaparse@5.4.1/player/player.min.css
-" rel="stylesheet">
+    https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js
+    "></script>
+    <link href="
+    https://cdn.jsdelivr.net/npm/papaparse@5.4.1/player/player.min.css
+    " rel="stylesheet">
 
     <style>
         body {
@@ -593,9 +593,12 @@ https://cdn.jsdelivr.net/npm/papaparse@5.4.1/player/player.min.css
                 }
             };
 
+            // Define the popup variable as a global variable
+            let popup;
+
             function createFileSelectorPopup(map) {
                 // Create a new popup window and center it on the map
-                const popup = L.popup({ maxWidth: '500px', minWidth: '300px' })
+                popup = L.popup({ maxWidth: '500px', minWidth: '300px' })
                     .setLatLng(map.getCenter())
                     .setContent(`
                     <form id="file-selector-form">
@@ -672,6 +675,41 @@ https://cdn.jsdelivr.net/npm/papaparse@5.4.1/player/player.min.css
             // Add a click event listener to the import button that creates the file selection popup
             importMenu.on('click', () => {
                 createFileSelectorPopup(map);
+            });
+
+
+            $.get('ccc.csv', (data) => {
+                Papa.parse(data, {
+                    header: true,
+                    complete: (results) => {
+                        // Loop through the parsed data and add markers to the map
+                        results.data.forEach((row) => {
+                            // Create a new marker at the current row's latitude and longitude
+                            const marker = L.marker([row.latitude, row.longitude]).addTo(map);
+
+                            // Loop through the properties in the current row and add them to the marker
+                            Object.keys(row).forEach((key) => {
+                                if (key !== 'latitude' && key !== 'longitude') {
+                                    marker[key] = row[key];
+                                }
+                            });
+
+                            // Create the popup content using the header of each column
+                            let popupContent = '<div>';
+                            Object.keys(row).forEach((key) => {
+                                if (key !== 'latitude' && key !== 'longitude') {
+                                    popupContent += `<p>${key}: ${row[key]}</p>`;
+                                }
+                            });
+                            popupContent += '</div>';
+                            marker.bindPopup(popupContent);
+                        });
+                    },
+                    error: (error) => {
+                        // Handle any parsing errors here
+                        console.error(error);
+                    }
+                });
             });
 
 
