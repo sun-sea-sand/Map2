@@ -15,12 +15,18 @@
     <script src="js/script.js" defer></script>
 
     <!-- Load Leaflet CSS and JavaScript files -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-        integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script src="
+    https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.min.js
+    "></script>
+    <link href="
+    https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.min.css
+    " rel="stylesheet">
+    <!-- Load jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.3.js"
         integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+    <!-- Load Papa Parse library -->
+    <script src="/PapaParse-5.0.2/papaparse.min.js"></script>
+
     <style>
         body {
             overflow: hidden;
@@ -228,11 +234,16 @@
             margin-left: 50px;
         }
 
-        #main {
-            transition: margin-left .5s;
-            padding: 16px;
+        /* Define the style for the file selector popup */
+        .leaflet-popup-content form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
+        .leaflet-popup-content input[type="file"] {
+            margin-bottom: 1em;
+        }
 
         @media screen and (max-width: 850px) {
             #search-div {
@@ -285,8 +296,8 @@
             <ul></ul>
         </div>
     </div>
-    <div id="My-location-div" title="My Location">
-        <button id="My-location-button">
+    <div id="My-location-div">
+        <button id="My-location-button" title="My Location">
             <svg fill="none" height="1em" viewBox="0 0 21 21" width="1em" xmlns="http://www.w3.org/2000/svg">
                 <path
                     d="M12 2C12.5128 2 12.9355 2.38604 12.9933 2.88338L13 3L13.0003 4.31397C16.4809 4.7625 19.2381 7.51999 19.6862 11.0007L21 11C21.5523 11 22 11.4477 22 12C22 12.5128 21.614 12.9355 21.1166 12.9933L21 13L19.686 13.0003C19.2375 16.4805 16.4805 19.2375 13.0003 19.686L13 21C13 21.5523 12.5523 22 12 22C11.4872 22 11.0645 21.614 11.0067 21.1166L11 21L11.0007 19.6862C7.51999 19.2381 4.7625 16.4809 4.31397 13.0003L3 13C2.44772 13 2 12.5523 2 12C2 11.4872 2.38604 11.0645 2.88338 11.0067L3 11L4.31384 11.0007C4.76197 7.51965 7.51965 4.76197 11.0007 4.31384L11 3C11 2.44772 11.4477 2 12 2ZM12 6.25C8.82436 6.25 6.25 8.82436 6.25 12C6.25 15.1756 8.82436 17.75 12 17.75C15.1756 17.75 17.75 15.1756 17.75 12C17.75 8.82436 15.1756 6.25 12 6.25ZM12 8C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8Z"
@@ -296,7 +307,7 @@
     </div>
     <div id="LeftSidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn">&times;</a>
-        <a href="#">Import</a>
+        <a id="import_menu" href="#">Import</a>
         <a href="#">..........</a>
         <a href="#">..........</a>
         <a href="#">..........</a>
@@ -374,7 +385,7 @@
                             });
                         });
                     } else if (isCoordinates) {
-                        // Use coordinate search
+                        // Use coordinate search - Array
                         var [lat, lon] = searchTerm.split(',');
                         map.setView([lat, lon], 13);
 
@@ -470,7 +481,6 @@
                 }
             });
 
-
             // Add event listener to search button
             $('#search-button').on('click', function (event) {
                 var firstResult = $('#search-results ul li:first-child');
@@ -536,9 +546,6 @@
                 $(".bar-menu-container").removeClass("change");
             });
 
-
-
-
             function getLocation() {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -580,6 +587,88 @@
                     map.setView([latitude, longitude], 10);
                 }
             };
+
+            function createFileSelectorPopup(map) {
+                // Create a new popup window and center it on the map
+                const popup = L.popup({ maxWidth: '500px', minWidth: '300px' })
+                    .setLatLng(map.getCenter())
+                    .setContent(`
+                    <form id="file-selector-form">
+                        <div>
+                            <label for="file-input">Choose a CSV file to import:</label>
+                            <input type="file" id="file-input" accept=".csv">
+                            </div>
+                            <div>
+                                <label for="file-path-input">Selected file:</label>
+                                <input type="text" id="file-path-input" readonly>
+                                </div>
+                                <button type="submit" id="import-button">Import</button>
+                                </form>
+                                `);
+
+                // Add the popup to the map
+                popup.addTo(map);
+
+                // Get references to the form and its inputs
+                const form = $('#file-selector-form');
+                const fileInput = $('#file-input');
+                const filePathInput = $('#file-path-input');
+
+                // Add event listeners to the file input and form submit button
+                fileInput.on('change', () => {
+                    // Set the selected file path in the file path input
+                    filePathInput.val(fileInput.val().split('\\').pop());
+                });
+
+                form.on('submit', (event) => {
+                    // Prevent the form from submitting
+                    event.preventDefault();
+
+                    // Get the selected file
+                    const file = fileInput[0].files[0];
+
+                    // Use Papa Parse to parse the CSV data from the file
+                    Papa.parse(file, {
+                        header: true,
+                        complete: (results) => {
+                            // Loop through the parsed data and add markers to the map
+                            results.data.forEach((row) => {
+                                // Create a new marker at the current row's latitude and longitude
+                                const marker = L.marker([row.latitude, row.longitude]).addTo(map);
+
+                                // Loop through the properties in the current row and add them to the marker
+                                Object.keys(row).forEach((key) => {
+                                    if (key !== 'latitude' && key !== 'longitude') {
+                                        marker[key] = row[key];
+                                    }
+                                });
+
+                                // Create the popup content using the header of each column
+                                let popupContent = '<div>';
+                                Object.keys(row).forEach((key) => {
+                                    if (key !== 'latitude' && key !== 'longitude') {
+                                        popupContent += `<p>${key}: ${row[key]}</p>`;
+                                    }
+                                });
+                                popupContent += '</div>';
+                                marker.bindPopup(popupContent);
+                            });
+
+                            // Close the popup
+                            popup.remove();
+                        },
+                    });
+                });
+            }
+
+            // Get a reference to your existing import button using jQuery
+            const importMenu = $('#import_menu');
+
+            // Add a click event listener to the import button that creates the file selection popup
+            importMenu.on('click', () => {
+                createFileSelectorPopup(map);
+            });
+
 
         });
     </script>
